@@ -114,3 +114,4 @@ describe('Training Plan Generation', () => {
     expect(getTodaysWorkout(plan)).toBeNull();
   });
 });
+

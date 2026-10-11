@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, type ErrorBoundaryProps } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../src/components/Button";
 import { RunMap } from "../src/components/RunMap";
@@ -13,6 +13,30 @@ import { getCurrentPaceSecPerKm, getElapsedMs } from "../src/tracking/tracker";
 import { useTheme } from "../src/theme";
 
 const NO_SIGNAL_AFTER_MS = 15_000;
+
+/** Shown instead of crashing if anything on this screen throws while rendering. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const t = useTheme();
+  const router = useRouter();
+  return (
+    <SafeAreaView style={[styles.container, styles.errorWrap, { backgroundColor: t.bg }]}>
+      <Text style={[styles.errorTitle, { color: t.text }]}>Something went wrong</Text>
+      <Text style={{ color: t.subtext, textAlign: "center" }}>
+        Your run is still being recorded. {error?.message ?? ""}
+      </Text>
+      <Button title="Try again" onPress={retry} />
+      <Button
+        title="Stop and review run"
+        variant="secondary"
+        onPress={async () => {
+          useRunStore.getState().stop();
+          await stopTracking().catch(() => {});
+          router.replace("/summary");
+        }}
+      />
+    </SafeAreaView>
+  );
+}
 
 export default function ActiveRun() {
   const t = useTheme();
@@ -104,5 +128,7 @@ const styles = StyleSheet.create({
   bannerText: { fontSize: 16, fontWeight: "700", textAlign: "center" },
   panel: { padding: 16, gap: 12 },
   row: { flexDirection: "row", gap: 12 },
-  flex: { flex: 1 }
+  flex: { flex: 1 },
+  errorWrap: { justifyContent: "center", padding: 24, gap: 16 },
+  errorTitle: { fontSize: 22, fontWeight: "800", textAlign: "center" }
 });
