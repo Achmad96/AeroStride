@@ -1,0 +1,15 @@
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Web Bundling failed 13562ms node_modules\expo-router\entry.js (774 modules)
+Error: Importing native-only module "react-native/Libraries/Utilities/codegenNativeCommands" on web from: D:\projects\running\node_modules\react-native-maps\lib\MapMarkerNativeComponent.js
+Error: Importing native-only module "react-native/Libraries/Utilities/codegenNativeCommands" on web from: D:\projects\running\node_modules\react-native-maps\lib\MapMarkerNativeComponent.js
+    at resolver (D:\projects\running\node_modules\@expo\cli\src\start\server\metro\withMetroMultiPlatform.ts:585:19)
+    at firstResolver (D:\projects\running\node_modules\@expo\cli\src\start\server\metro\withMetroResolvers.ts:76:29)
+    at firstResolver (D:\projects\running\node_modules\@expo\cli\src\start\server\metro\withMetroResolvers.ts:108:16)
+    at resolveRequest (D:\projects\running\node_modules\@expo\cli\src\start\server\metro\withMetroResolvers.ts:137:16)
+    at Object.resolve (D:\projects\running\node_modules\metro-resolver\src\resolve.js:36:12)
+    at ModuleResolver.resolveDependency (D:\projects\running\node_modules\metro\src\node-haste\DependencyGraph\ModuleResolution.js:74:31)
+    at DependencyGraph.resolveDependency (D:\projects\running\node_modules\metro\src\node-haste\DependencyGraph.js:248:43)
+    at D:\projects\running\node_modules\metro\src\lib\transformHelpers.js:165:21
+    at resolveDependencies (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:42:25)
+    at visit (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:83:30)

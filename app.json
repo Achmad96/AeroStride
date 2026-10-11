@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Run Tracker",
+    "slug": "run-tracker",
+    "version": "1.0.0",
+    "scheme": "runtracker",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.example.runtracker",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location"
+        ],
+        "NSLocationWhenInUseUsageDescription": "Run Tracker uses your location to record your running route, distance and pace.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Run Tracker keeps recording your route while the screen is locked or the app is in the background."
+      }
+    },
+    "android": {
+      "package": "com.example.runtracker",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB2FRyO-9g1P_l5G-uK4TbJZjg_zmqTZog"
+        }
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Run Tracker keeps recording your route while the screen is locked or the app is in the background.",
+          "locationWhenInUsePermission": "Run Tracker uses your location to record your running route, distance and pace.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-font",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "72804dad-6533-4e28-bcdb-3ea6fc8c98eb"
+      }
+    }
+  }
+}

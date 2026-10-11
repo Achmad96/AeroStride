@@ -1,0 +1,33 @@
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Android Bundling failed 9629ms node_modules\expo-router\entry.js (1033 modules)
+Error: Unable to resolve module query-string from D:\projects\running\node_modules\expo-router\build\fork\getPathFromState.js: query-string could not be found within the project or in these directories:
+  node_modules\expo-router\node_modules
+  node_modules
+  25 | Object.defineProperty(exports, "__esModule", { value: true });
+  26 | exports.appendBaseUrl = exports.getPathDataFromState = exports.getPathFromState = void 0;
+> 27 | const queryString = __importStar(require("query-string"));
+     |                                           ^
+  28 | const expo = __importStar(require("./getPathFromState-forks"));
+  29 | // END FORK
+  30 | const getActiveRoute = (state) => {
+Error: Unable to resolve module query-string from D:\projects\running\node_modules\expo-router\build\fork\getPathFromState.js: query-string could not be found within the project or in these directories:
+  node_modules\expo-router\node_modules
+  node_modules
+  25 | Object.defineProperty(exports, "__esModule", { value: true });
+  26 | exports.appendBaseUrl = exports.getPathDataFromState = exports.getPathFromState = void 0;
+> 27 | const queryString = __importStar(require("query-string"));
+     |                                           ^
+  28 | const expo = __importStar(require("./getPathFromState-forks"));
+  29 | // END FORK
+  30 | const getActiveRoute = (state) => {
+    at ModuleResolver.resolveDependency (D:\projects\running\node_modules\metro\src\node-haste\DependencyGraph\ModuleResolution.js:150:15)
+    at DependencyGraph.resolveDependency (D:\projects\running\node_modules\metro\src\node-haste\DependencyGraph.js:248:43)
+    at D:\projects\running\node_modules\metro\src\lib\transformHelpers.js:165:21
+    at resolveDependencies (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:42:25)
+    at visit (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:83:30)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 10)
+    at visit (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:92:5)
+    at async Promise.all (index 6)
+    at visit (D:\projects\running\node_modules\metro\src\DeltaBundler\buildSubgraph.js:92:5)
