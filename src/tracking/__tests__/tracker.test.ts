@@ -10,6 +10,7 @@ import {
   startRun,
   stopRun,
   toRunDraft,
+  MIN_SAVE_DISTANCE_M,
   type TrackState,
 } from '../tracker';
 import type { Fix } from '../../types';
@@ -140,9 +141,9 @@ describe('stop, save and recovery', () => {
     expect(run.routePoints.length).toBeGreaterThan(50);
   });
 
-  it('refuses to save runs under 10 m', () => {
-    expect(canSave(9.9)).toBe(false);
-    expect(canSave(10)).toBe(true);
+  it('refuses to save runs under minimum distance', () => {
+    expect(canSave(MIN_SAVE_DISTANCE_M - 0.1)).toBe(false);
+    expect(canSave(MIN_SAVE_DISTANCE_M)).toBe(true);
   });
 
   it('recovers a killed run as paused, counted up to its last GPS point', () => {
