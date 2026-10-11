@@ -3,14 +3,16 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Stat } from '../../src/components/Stat';
 import { Button } from '../../src/components/Button';
-import { getCurrentPerformance, getStatsSince, type PeriodStats } from '../../src/db/database';
+import { getCurrentPerformance, getStatsSince, listRuns, type PeriodStats } from '../../src/db/database';
 import { useRunStore } from '../../src/store/runStore';
 import { useSettings } from '../../src/store/settingsStore';
 import { distanceLabel, formatDistance, formatDuration, startOfWeek } from '../../src/tracking/geo';
 import { ensureLocationPermission, startTracking, stopTracking } from '../../src/tracking/locationService';
 import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey, Workout } from '../../src/tracking/trainingPlan';
 import { usePlanStore } from '../../src/store/planStore';
+import { WeeklyMiniChart } from '../../src/components/WeeklyMiniChart';
 import { useTheme } from '../../src/theme';
+import type { RunListItem } from '../../src/types';
 
 export default function Home() {
   const t = useTheme();
@@ -20,6 +22,7 @@ export default function Home() {
   const status = useRunStore((s) => s.run.status);
   const [stats, setStats] = useState<PeriodStats>({ runs: 0, distanceM: 0, durationSec: 0 });
   const [currentPerf, setCurrentPerf] = useState<{ speedMinsPerKm: number; distanceKm: number } | null>(null);
+  const [runs, setRuns] = useState<RunListItem[]>([]);
   const checkedRecovery = useRef(false);
 
   const completedWorkouts = usePlanStore((s) => s.completedWorkouts);
@@ -31,6 +34,7 @@ export default function Home() {
       usePlanStore.getState().load();
       getStatsSince(startOfWeek()).then(setStats).catch(() => {});
       getCurrentPerformance().then(setCurrentPerf).catch(() => {});
+      listRuns().then(setRuns).catch(() => {});
     }, [])
   );
 
@@ -132,14 +136,23 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.week, { backgroundColor: t.card }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="This week stats, tap to view analytics"
+        onPress={() => router.push({ pathname: '/(tabs)/history', params: { tab: 'analytics' } })}
+        style={({ pressed }) => [
+          styles.week,
+          { backgroundColor: t.card, opacity: pressed ? 0.9 : 1 },
+        ]}
+      >
         <Text style={[styles.weekTitle, { color: t.subtext }]}>THIS WEEK</Text>
         <View style={styles.row}>
           <Stat label="Distance" value={formatDistance(stats.distanceM, unit)} unit={distanceLabel(unit)} style={styles.flat} />
           <Stat label="Time" value={formatDuration(stats.durationSec)} style={styles.flat} />
           <Stat label="Runs" value={String(stats.runs)} style={styles.flat} />
         </View>
-      </View>
+        <WeeklyMiniChart runs={runs} unit={unit} />
+      </Pressable>
 
       {todaysWorkout && (
         <View
