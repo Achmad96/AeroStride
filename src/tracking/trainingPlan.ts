@@ -52,20 +52,19 @@ export function generateTrainingPlan(
   const startDate = startDateStr ? new Date(startDateStr) : new Date();
   let currentDayIndex = startDate.getDay() === 0 ? 6 : startDate.getDay() - 1;
 
-  if (goal === 'distance' && currDist > 0 && targetDist > currDist) {
-    let maxRun = currDist;
-    
-    // Aggressiveness of distance increase (e.g. 10% base + adjusted)
+  if (goal === 'distance') {
+    const startDist = currDist > 0 ? currDist : 2;
+    const finalDist = targetDist > startDist ? targetDist : startDist + 5;
+    let maxRun = startDist;
     const weeklyIncreaseRate = 1.0 + (0.10 * progressionFactor);
 
-    while (maxRun < targetDist && dayCounter <= 180) { // Max 6 months
-      maxRun = Math.min(targetDist, maxRun * weeklyIncreaseRate);
+    while (maxRun < finalDist && dayCounter <= 180) {
+      maxRun = Math.min(finalDist, maxRun * weeklyIncreaseRate);
       const shortRun = Math.max(1, maxRun * 0.4);
-      const easyPace = currSpeed > 0 ? currSpeed * 1.2 : 0;
+      const easyPace = currSpeed > 0 ? currSpeed * 1.2 : 6.5;
 
       for (let i = 0; i < 7; i++) {
         const dayOfWeek = DAYS_OF_WEEK[currentDayIndex % 7];
-        
         let desc = 'Rest or cross-train';
         let type: Workout['type'] = 'rest';
         let distanceKm = 0;
@@ -100,18 +99,18 @@ export function generateTrainingPlan(
         currentDayIndex++;
       }
     }
-  } else if (goal === 'speed' && currSpeed > 0 && targetSpeed > 0 && targetSpeed < currSpeed) {
-    let pace = currSpeed;
-    
+  } else if (goal === 'speed') {
+    const startPace = currSpeed > 0 ? currSpeed : 6.5;
+    const goalPace = targetSpeed > 0 && targetSpeed < startPace ? targetSpeed : Math.max(3.5, startPace - 1.0);
+    let pace = startPace;
     const weeklyPaceImprovement = 0.1 * progressionFactor;
 
-    while (pace > targetSpeed && dayCounter <= 180) {
+    while (pace > goalPace && dayCounter <= 180) {
       pace -= weeklyPaceImprovement;
-      if (pace < targetSpeed) pace = targetSpeed;
+      if (pace < goalPace) pace = goalPace;
 
       for (let i = 0; i < 7; i++) {
         const dayOfWeek = DAYS_OF_WEEK[currentDayIndex % 7];
-        
         let desc = 'Rest or cross-train';
         let type: Workout['type'] = 'rest';
         let distanceKm = 0;
@@ -151,7 +150,109 @@ export function generateTrainingPlan(
         currentDayIndex++;
       }
     }
+  } else if (goal === 'fitness') {
+    const baseDist = currDist > 0 ? currDist : 3.0;
+    const basePace = currSpeed > 0 ? currSpeed : 6.5;
+    for (let week = 0; week < 8; week++) {
+      const dist = baseDist + week * 0.3 * progressionFactor;
+      for (let i = 0; i < 7; i++) {
+        const dayOfWeek = DAYS_OF_WEEK[currentDayIndex % 7];
+        let desc = 'Rest or stretch';
+        let type: Workout['type'] = 'rest';
+        let distanceKm = 0;
+        let pace = 0;
+
+        if (dayOfWeek === 'Tuesday') {
+          desc = `Cardio run: ${(dist * 0.8).toFixed(1)} km`;
+          type = 'easy';
+          distanceKm = dist * 0.8;
+          pace = basePace;
+        } else if (dayOfWeek === 'Thursday') {
+          desc = `Brisk run: ${(dist * 0.9).toFixed(1)} km`;
+          type = 'tempo';
+          distanceKm = dist * 0.9;
+          pace = basePace * 0.95;
+        } else if (dayOfWeek === 'Saturday') {
+          desc = `Endurance run: ${dist.toFixed(1)} km`;
+          type = 'long';
+          distanceKm = dist;
+          pace = basePace;
+        }
+
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + dayCounter - 1);
+
+        workouts.push({
+          dayNumber: dayCounter,
+          dayOfWeek,
+          dateStr: date.toISOString(),
+          desc: pace > 0 ? `${desc} @ ${pace.toFixed(2)} min/km` : desc,
+          type,
+          distanceKm,
+          pace,
+        });
+
+        dayCounter++;
+        currentDayIndex++;
+      }
+    }
+  } else if (goal === 'weight_loss') {
+    const baseDist = currDist > 0 ? currDist : 3.0;
+    const basePace = currSpeed > 0 ? currSpeed * 1.1 : 7.0;
+    for (let week = 0; week < 8; week++) {
+      const dist = baseDist + week * 0.4 * progressionFactor;
+      for (let i = 0; i < 7; i++) {
+        const dayOfWeek = DAYS_OF_WEEK[currentDayIndex % 7];
+        let desc = 'Rest or active recovery (walking)';
+        let type: Workout['type'] = 'rest';
+        let distanceKm = 0;
+        let pace = 0;
+
+        if (dayOfWeek === 'Tuesday' || dayOfWeek === 'Friday') {
+          desc = `Fat-burn jog: ${(dist * 0.75).toFixed(1)} km`;
+          type = 'easy';
+          distanceKm = dist * 0.75;
+          pace = basePace;
+        } else if (dayOfWeek === 'Wednesday') {
+          desc = `Calorie-burn intervals: 5x300m brisk`;
+          type = 'interval';
+          distanceKm = 2.0;
+          pace = basePace * 0.85;
+        } else if (dayOfWeek === 'Sunday') {
+          desc = `Long calorie-burn run: ${dist.toFixed(1)} km`;
+          type = 'long';
+          distanceKm = dist;
+          pace = basePace;
+        }
+
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + dayCounter - 1);
+
+        workouts.push({
+          dayNumber: dayCounter,
+          dayOfWeek,
+          dateStr: date.toISOString(),
+          desc: pace > 0 ? `${desc} @ ${pace.toFixed(2)} min/km` : desc,
+          type,
+          distanceKm,
+          pace,
+        });
+
+        dayCounter++;
+        currentDayIndex++;
+      }
+    }
   }
 
   return { totalDays: dayCounter - 1, workouts };
+}
+
+export function getTodaysWorkout(plan: TrainingPlan, today: Date = new Date()): Workout | null {
+  if (!plan.workouts.length) return null;
+  const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  return plan.workouts.find((w) => {
+    if (!w.dateStr) return false;
+    const d = new Date(w.dateStr);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayKey;
+  }) || null;
 }

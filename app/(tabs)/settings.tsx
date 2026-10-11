@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View, Alert, type ViewStyle } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Button } from "../../src/components/Button";
 import { useSettings } from "../../src/store/settingsStore";
 import { useTheme } from "../../src/theme";
@@ -27,6 +27,7 @@ function SelectRow<T extends string>({ label, options, value, onChange }: { labe
 
 export default function Settings() {
   const t = useTheme();
+  const router = useRouter();
   const { unit, setUnit, profile, setProfile } = useSettings();
 
   // Local state for smooth typing
@@ -51,6 +52,7 @@ export default function Settings() {
   );
 
   const save = () => {
+    const newStartDate = new Date().toISOString();
     setProfile({
       goal,
       gender,
@@ -61,9 +63,19 @@ export default function Settings() {
       targetDistanceKm: targetDistance,
       currentSpeedMinsPerKm: currSpeed,
       currentDistanceKm: currDistance,
-      planStartDate: profile.planStartDate || new Date().toISOString()
+      planStartDate: newStartDate
     });
-    Alert.alert("Saved", "Your personalization settings have been updated!");
+    Alert.alert(
+      "Plan Applied",
+      "Your personalization settings have been saved and your new training plan is active starting today!",
+      [
+        {
+          text: "View Plan",
+          onPress: () => router.push("/(tabs)/plan")
+        },
+        { text: "OK" }
+      ]
+    );
   };
 
   const displaySpeed = currentPerf ? currentPerf.speedMinsPerKm.toFixed(2) : currSpeed;

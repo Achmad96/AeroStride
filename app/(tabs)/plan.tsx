@@ -1,10 +1,10 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/settingsStore';
 import { useTheme } from '../../src/theme';
-import { generateTrainingPlan, Workout } from '../../src/tracking/trainingPlan';
+import { generateTrainingPlan, getTodaysWorkout, Workout } from '../../src/tracking/trainingPlan';
 import { Button } from '../../src/components/Button';
 import { useAirQuality } from '../../src/tracking/airQuality';
 import { getCurrentPerformance } from '../../src/db/database';
@@ -39,9 +39,16 @@ export default function PlanTab() {
 
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
 
-  // Initialize currentMonth to the plan's start date (or today)
+  // Initialize and synchronize currentMonth whenever plan start date changes
   const initialDate = profile.planStartDate ? new Date(profile.planStartDate) : new Date();
   const [currentMonth, setCurrentMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
+
+  useEffect(() => {
+    const pDate = profile.planStartDate ? new Date(profile.planStartDate) : new Date();
+    setCurrentMonth(new Date(pDate.getFullYear(), pDate.getMonth(), 1));
+  }, [profile.planStartDate]);
+
+  const todaysWorkout = useMemo(() => getTodaysWorkout(plan), [plan]);
 
   const planByDate = useMemo(() => {
     const map = new Map<string, Workout>();
@@ -103,6 +110,24 @@ export default function PlanTab() {
           {plan.totalDays} days to reach your goal
         </Text>
 
+        {todaysWorkout && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setSelectedWorkout(todaysWorkout)}
+            style={[styles.todayCard, { backgroundColor: t.card, borderColor: t.primary }]}
+          >
+            <View style={styles.todayHeaderRow}>
+              <View style={[styles.todayBadge, { backgroundColor: t.primary }]}>
+                <Text style={[styles.todayBadgeText, { color: t.onPrimary }]}>TODAY'S TARGET</Text>
+              </View>
+              <Text style={[styles.todayType, { color: t.primary }]}>
+                {todaysWorkout.type.toUpperCase()}
+              </Text>
+            </View>
+            <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={[styles.aqiContainer, { backgroundColor: t.card, borderColor: t.border }]}>
           <Text style={[styles.aqiTitle, { color: t.text }]}>Today's Running Recommendation</Text>
           {loading && <ActivityIndicator size="small" color={t.primary} style={{ marginTop: 8 }} />}
@@ -150,6 +175,12 @@ export default function PlanTab() {
                 const isRest = workout ? workout.type === 'rest' : true;
                 const hasWorkout = !!workout;
 
+                const today = new Date();
+                const isToday =
+                  today.getFullYear() === currentMonth.getFullYear() &&
+                  today.getMonth() === currentMonth.getMonth() &&
+                  today.getDate() === dayNum;
+
                 return (
                   <TouchableOpacity
                     key={`day-${dayNum}`}
@@ -160,7 +191,10 @@ export default function PlanTab() {
                         backgroundColor: hasWorkout
                           ? (isRest ? t.card : t.primary)
                           : 'transparent',
-                        borderColor: hasWorkout ? t.border : 'transparent',
+                        borderColor: isToday
+                          ? (hasWorkout && !isRest ? '#fff' : t.primary)
+                          : (hasWorkout ? t.border : 'transparent'),
+                        borderWidth: isToday ? 2.5 : 1,
                         opacity: hasWorkout ? 1 : 0.4,
                       },
                     ]}
@@ -169,7 +203,7 @@ export default function PlanTab() {
                     <Text
                       style={[
                         styles.dayText,
-                        { color: hasWorkout && !isRest ? '#fff' : t.text },
+                        { color: hasWorkout && !isRest ? '#fff' : (isToday ? t.primary : t.text) },
                       ]}
                     >
                       {dayNum}
@@ -258,6 +292,38 @@ const styles = StyleSheet.create({
   scroll: { padding: 16 },
   header: { fontSize: 24, fontWeight: '800' },
   subHeader: { fontSize: 14, marginBottom: 16 },
+  todayCard: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    marginBottom: 16,
+    gap: 8,
+  },
+  todayHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  todayBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  todayBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  todayType: {
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  todayDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 22,
+  },
   aqiContainer: { padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 24 },
   aqiTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
   aqiLevel: { fontSize: 18, fontWeight: '800', marginBottom: 4 },
