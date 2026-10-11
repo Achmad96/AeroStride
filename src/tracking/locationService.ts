@@ -124,6 +124,7 @@ async function startBackgroundUpdates(): Promise<void> {
         notificationTitle: 'Run in progress',
         notificationBody: 'Run Tracker is recording your route.',
         notificationColor: '#0A7F3F',
+        killServiceOnDestroy: false,
       },
     });
   } catch (err) {
