@@ -8,7 +8,7 @@ export const MAX_SPEED_MPS = 12;
 /** Steps shorter than this (metres) are treated as GPS jitter while standing. */
 export const MIN_STEP_M = 2;
 /** Runs shorter than this (metres) cannot be saved. */
-export const MIN_SAVE_DISTANCE_M = 10;
+export const MIN_SAVE_DISTANCE_M = 1;
 /** Window used for the "current pace" display. */
 export const PACE_WINDOW_MS = 30_000;
 

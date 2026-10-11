@@ -10,6 +10,8 @@
     "start:dev-client:tunnel": "expo start --dev-client --tunnel",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "build:apk": "eas build -p android --profile preview",
+    "eas-build-pre-install": "npm config set legacy-peer-deps true",
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },

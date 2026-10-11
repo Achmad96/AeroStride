@@ -30,12 +30,7 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
-      ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyB2FRyO-9g1P_l5G-uK4TbJZjg_zmqTZog"
-        }
-      }
+      ]
     },
     "plugins": [
       "expo-router",
