@@ -44,11 +44,16 @@ src/
 npm install
 npm test               # unit tests
 npm run typecheck
-npx expo start         # UI in Expo Go (foreground only)
+npx expo start         # UI in Expo Go (foreground only, requires same Wi-Fi network)
+npm run start:tunnel   # UI in Expo Go over internet (no same Wi-Fi needed!)
 
 # Full functionality incl. background tracking (development build):
-npx expo run:android   # or: npx expo run:ios  (needs macOS/Xcode)
+npx expo run:android   # or: npx expo run:ios (needs macOS/Xcode)
 npx expo start --dev-client
+npm run start:dev-client:tunnel # Dev client over internet (no same Wi-Fi needed!)
+
+# Standalone build (install directly on device, completely offline & no computer needed):
+npx eas build -p android --profile preview
 ```
 
 If `npm install` reports version mismatches, run `npx expo install --fix`.

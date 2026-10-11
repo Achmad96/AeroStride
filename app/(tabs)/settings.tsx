@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View, Alert } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View, Alert, type ViewStyle } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Button } from "../../src/components/Button";
 import { useSettings } from "../../src/store/settingsStore";
@@ -10,7 +10,7 @@ function SelectRow<T extends string>({ label, options, value, onChange }: { labe
   const t = useTheme();
   // If there are more than 3 options, don't force them all on one line.
   // Using minWidth ensures they wrap into a grid (e.g. 2x2) rather than squishing.
-  const buttonStyle = options.length > 3 ? { flexGrow: 1, minWidth: "45%", paddingVertical: 8 } : { flex: 1, paddingVertical: 8 };
+  const buttonStyle: ViewStyle = options.length > 3 ? { flexGrow: 1, minWidth: "45%", paddingVertical: 8 } : { flex: 1, paddingVertical: 8 };
 
   return (
     <View style={styles.field}>
