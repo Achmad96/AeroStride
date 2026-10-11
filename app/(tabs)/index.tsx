@@ -8,7 +8,8 @@ import { useRunStore } from '../../src/store/runStore';
 import { useSettings } from '../../src/store/settingsStore';
 import { distanceLabel, formatDistance, formatDuration, startOfWeek } from '../../src/tracking/geo';
 import { ensureLocationPermission, startTracking, stopTracking } from '../../src/tracking/locationService';
-import { generateTrainingPlan, getTodaysWorkout } from '../../src/tracking/trainingPlan';
+import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey, Workout } from '../../src/tracking/trainingPlan';
+import { usePlanStore } from '../../src/store/planStore';
 import { useTheme } from '../../src/theme';
 
 export default function Home() {
@@ -21,8 +22,13 @@ export default function Home() {
   const [currentPerf, setCurrentPerf] = useState<{ speedMinsPerKm: number; distanceKm: number } | null>(null);
   const checkedRecovery = useRef(false);
 
+  const completedWorkouts = usePlanStore((s) => s.completedWorkouts);
+  const completeWorkout = usePlanStore((s) => s.completeWorkout);
+  const uncompleteWorkout = usePlanStore((s) => s.uncompleteWorkout);
+
   useFocusEffect(
     useCallback(() => {
+      usePlanStore.getState().load();
       getStatsSince(startOfWeek()).then(setStats).catch(() => {});
       getCurrentPerformance().then(setCurrentPerf).catch(() => {});
     }, [])
@@ -44,6 +50,40 @@ export default function Home() {
   ), [profile, currentSpeed, currentDistance]);
 
   const todaysWorkout = useMemo(() => getTodaysWorkout(plan), [plan]);
+
+  const isTodayCompleted = todaysWorkout?.dateStr
+    ? !!completedWorkouts[getWorkoutDateKey(todaysWorkout.dateStr)]
+    : false;
+
+  const handleToggleComplete = async (workout: Workout) => {
+    if (!workout.dateStr) return;
+    const dateKey = getWorkoutDateKey(workout.dateStr);
+    const isCompleted = !!completedWorkouts[dateKey];
+
+    if (isCompleted) {
+      Alert.alert(
+        'Mark as Incomplete?',
+        'Do you want to unmark this run as completed?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Mark Incomplete',
+            style: 'destructive',
+            onPress: async () => {
+              await uncompleteWorkout(workout);
+              getStatsSince(startOfWeek()).then(setStats).catch(() => {});
+              getCurrentPerformance().then(setCurrentPerf).catch(() => {});
+            },
+          },
+        ]
+      );
+    } else {
+      await completeWorkout(workout);
+      getStatsSince(startOfWeek()).then(setStats).catch(() => {});
+      getCurrentPerformance().then(setCurrentPerf).catch(() => {});
+      Alert.alert('Run Completed! 🎉', `Marked "${workout.desc}" as complete.`);
+    }
+  };
 
   // Recover an unsaved run if the app was killed mid-run.
   useEffect(() => {
@@ -102,25 +142,52 @@ export default function Home() {
       </View>
 
       {todaysWorkout && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Today's Target, tap to view full plan"
-          onPress={() => router.push('/(tabs)/plan')}
-          style={({ pressed }) => [
+        <View
+          style={[
             styles.todayCard,
-            { backgroundColor: t.card, opacity: pressed ? 0.85 : 1 },
+            {
+              backgroundColor: t.card,
+              borderColor: isTodayCompleted ? '#10B981' : t.primary,
+              borderWidth: 1.5,
+            },
           ]}
         >
-          <View style={styles.todayHeader}>
-            <View style={[styles.todayBadge, { backgroundColor: t.primary }]}>
-              <Text style={[styles.todayBadgeText, { color: t.onPrimary }]}>TODAY'S TARGET</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Today's Target, tap to view full plan"
+            onPress={() => router.push('/(tabs)/plan')}
+          >
+            <View style={styles.todayHeader}>
+              <View
+                style={[
+                  styles.todayBadge,
+                  { backgroundColor: isTodayCompleted ? '#10B981' : t.primary },
+                ]}
+              >
+                <Text style={[styles.todayBadgeText, { color: '#fff' }]}>
+                  {isTodayCompleted ? 'COMPLETED ✓' : "TODAY'S TARGET"}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.todayType,
+                  { color: isTodayCompleted ? '#10B981' : t.primary },
+                ]}
+              >
+                {todaysWorkout.type.toUpperCase()}
+              </Text>
             </View>
-            <Text style={[styles.todayType, { color: t.primary }]}>
-              {todaysWorkout.type.toUpperCase()}
-            </Text>
-          </View>
-          <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
-        </Pressable>
+            <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
+          </Pressable>
+          {todaysWorkout.type !== 'rest' && (
+            <Button
+              title={isTodayCompleted ? 'Completed ✓' : 'Complete Run'}
+              variant={isTodayCompleted ? 'secondary' : 'primary'}
+              onPress={() => handleToggleComplete(todaysWorkout)}
+              style={{ marginTop: 8 }}
+            />
+          )}
+        </View>
       )}
 
       <View style={styles.center}>

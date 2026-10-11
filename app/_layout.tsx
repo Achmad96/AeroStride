@@ -3,14 +3,17 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSettings } from '../src/store/settingsStore';
+import { usePlanStore } from '../src/store/planStore';
 import { useTheme } from '../src/theme';
 
 export default function RootLayout() {
   const t = useTheme();
   const loadSettings = useSettings((s) => s.load);
+  const loadPlan = usePlanStore((s) => s.load);
   useEffect(() => {
     loadSettings();
-  }, [loadSettings]);
+    loadPlan();
+  }, [loadSettings, loadPlan]);
 
   return (
     <>

@@ -1,10 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator, Alert } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../../src/store/settingsStore';
+import { usePlanStore } from '../../src/store/planStore';
 import { useTheme } from '../../src/theme';
-import { generateTrainingPlan, getTodaysWorkout, Workout } from '../../src/tracking/trainingPlan';
+import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey, Workout } from '../../src/tracking/trainingPlan';
 import { Button } from '../../src/components/Button';
 import { useAirQuality } from '../../src/tracking/airQuality';
 import { getCurrentPerformance } from '../../src/db/database';
@@ -15,12 +16,44 @@ export default function PlanTab() {
   const { aqi, loading, error } = useAirQuality();
 
   const [currentPerf, setCurrentPerf] = useState<{ speedMinsPerKm: number; distanceKm: number } | null>(null);
+  const completedWorkouts = usePlanStore((s) => s.completedWorkouts);
+  const completeWorkout = usePlanStore((s) => s.completeWorkout);
+  const uncompleteWorkout = usePlanStore((s) => s.uncompleteWorkout);
 
   useFocusEffect(
     useCallback(() => {
+      usePlanStore.getState().load();
       getCurrentPerformance().then(setCurrentPerf).catch(() => {});
     }, [])
   );
+
+  const handleToggleComplete = async (workout: Workout) => {
+    if (!workout.dateStr) return;
+    const dateKey = getWorkoutDateKey(workout.dateStr);
+    const isCompleted = !!completedWorkouts[dateKey];
+
+    if (isCompleted) {
+      Alert.alert(
+        'Mark as Incomplete?',
+        'Do you want to unmark this run as completed?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Mark Incomplete',
+            style: 'destructive',
+            onPress: async () => {
+              await uncompleteWorkout(workout);
+              getCurrentPerformance().then(setCurrentPerf).catch(() => {});
+            },
+          },
+        ]
+      );
+    } else {
+      await completeWorkout(workout);
+      getCurrentPerformance().then(setCurrentPerf).catch(() => {});
+      Alert.alert('Run Completed! 🎉', `Marked "${workout.desc}" as complete.`);
+    }
+  };
 
   const currentSpeed = currentPerf ? currentPerf.speedMinsPerKm : parseFloat(profile.currentSpeedMinsPerKm) || 0;
   const currentDistance = currentPerf ? currentPerf.distanceKm : parseFloat(profile.currentDistanceKm) || 0;
@@ -53,8 +86,7 @@ export default function PlanTab() {
   const planByDate = useMemo(() => {
     const map = new Map<string, Workout>();
     plan.workouts.forEach((w) => {
-      const d = new Date(w.dateStr!);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const key = getWorkoutDateKey(w.dateStr!);
       map.set(key, w);
     });
     return map;
@@ -110,23 +142,57 @@ export default function PlanTab() {
           {plan.totalDays} days to reach your goal
         </Text>
 
-        {todaysWorkout && (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setSelectedWorkout(todaysWorkout)}
-            style={[styles.todayCard, { backgroundColor: t.card, borderColor: t.primary }]}
-          >
-            <View style={styles.todayHeaderRow}>
-              <View style={[styles.todayBadge, { backgroundColor: t.primary }]}>
-                <Text style={[styles.todayBadgeText, { color: t.onPrimary }]}>TODAY'S TARGET</Text>
-              </View>
-              <Text style={[styles.todayType, { color: t.primary }]}>
-                {todaysWorkout.type.toUpperCase()}
-              </Text>
+        {todaysWorkout && (() => {
+          const isTodayCompleted = todaysWorkout.dateStr
+            ? !!completedWorkouts[getWorkoutDateKey(todaysWorkout.dateStr)]
+            : false;
+          return (
+            <View
+              style={[
+                styles.todayCard,
+                {
+                  backgroundColor: t.card,
+                  borderColor: isTodayCompleted ? '#10B981' : t.primary,
+                },
+              ]}
+            >
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setSelectedWorkout(todaysWorkout)}
+              >
+                <View style={styles.todayHeaderRow}>
+                  <View
+                    style={[
+                      styles.todayBadge,
+                      { backgroundColor: isTodayCompleted ? '#10B981' : t.primary },
+                    ]}
+                  >
+                    <Text style={[styles.todayBadgeText, { color: '#fff' }]}>
+                      {isTodayCompleted ? 'COMPLETED ✓' : "TODAY'S TARGET"}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.todayType,
+                      { color: isTodayCompleted ? '#10B981' : t.primary },
+                    ]}
+                  >
+                    {todaysWorkout.type.toUpperCase()}
+                  </Text>
+                </View>
+                <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
+              </TouchableOpacity>
+              {todaysWorkout.type !== 'rest' && (
+                <Button
+                  title={isTodayCompleted ? 'Completed ✓' : 'Complete Run'}
+                  variant={isTodayCompleted ? 'secondary' : 'primary'}
+                  onPress={() => handleToggleComplete(todaysWorkout)}
+                  style={{ marginTop: 8 }}
+                />
+              )}
             </View>
-            <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
-          </TouchableOpacity>
-        )}
+          );
+        })()}
 
         <View style={[styles.aqiContainer, { backgroundColor: t.card, borderColor: t.border }]}>
           <Text style={[styles.aqiTitle, { color: t.text }]}>Today's Running Recommendation</Text>
@@ -170,10 +236,11 @@ export default function PlanTab() {
                 if (dayNum === null) {
                   return <View key={`empty-${rIdx}-${cIdx}`} style={[styles.dayBox, { borderWidth: 0 }]} />;
                 }
-                const key = `${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${dayNum}`;
+                const key = getWorkoutDateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNum));
                 const workout = planByDate.get(key);
                 const isRest = workout ? workout.type === 'rest' : true;
                 const hasWorkout = !!workout;
+                const isCompleted = !!completedWorkouts[key];
 
                 const today = new Date();
                 const isToday =
@@ -189,7 +256,7 @@ export default function PlanTab() {
                       styles.dayBox,
                       {
                         backgroundColor: hasWorkout
-                          ? (isRest ? t.card : t.primary)
+                          ? (isRest ? t.card : isCompleted ? '#10B981' : t.primary)
                           : 'transparent',
                         borderColor: isToday
                           ? (hasWorkout && !isRest ? '#fff' : t.primary)
@@ -209,7 +276,11 @@ export default function PlanTab() {
                       {dayNum}
                     </Text>
                     {hasWorkout && !isRest && (
-                      <View style={styles.runDot} />
+                      isCompleted ? (
+                        <Ionicons name="checkmark" size={12} color="#fff" style={{ marginTop: 1 }} />
+                      ) : (
+                        <View style={styles.runDot} />
+                      )
                     )}
                   </TouchableOpacity>
                 );
@@ -222,7 +293,7 @@ export default function PlanTab() {
           <Text style={[styles.agendaHeader, { color: t.text }]}>This Month's Menu</Text>
           {calendarDays.map((dayNum) => {
             if (dayNum === null) return null;
-            const key = `${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${dayNum}`;
+            const key = getWorkoutDateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNum));
             const workout = planByDate.get(key);
             if (!workout) return null;
             
@@ -230,17 +301,26 @@ export default function PlanTab() {
             if (isRest) return null; // Hide rest days from the list
 
             const dateStr = new Date(workout.dateStr!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+            const isCompleted = !!completedWorkouts[key];
             
             return (
-              <View key={`agenda-${dayNum}`} style={[styles.agendaRow, { borderBottomColor: t.border }]}>
+              <TouchableOpacity
+                key={`agenda-${dayNum}`}
+                activeOpacity={0.7}
+                onPress={() => setSelectedWorkout(workout)}
+                style={[styles.agendaRow, { borderBottomColor: t.border }]}
+              >
                 <View style={styles.agendaDateWrap}>
                   <Text style={[styles.agendaDate, { color: t.text }]}>{dateStr}</Text>
-                  <Text style={[styles.agendaType, { color: t.primary }]}>
-                    {workout.type.toUpperCase()}
+                  <Text style={[styles.agendaType, { color: isCompleted ? '#10B981' : t.primary }]}>
+                    {workout.type.toUpperCase()}{isCompleted ? ' ✓' : ''}
                   </Text>
                 </View>
-                <Text style={[styles.agendaDesc, { color: t.subtext }]}>{workout.desc}</Text>
-              </View>
+                <Text style={[styles.agendaDesc, { color: isCompleted ? t.subtext : t.text }]}>{workout.desc}</Text>
+                {isCompleted && (
+                  <Ionicons name="checkmark-circle" size={20} color="#10B981" style={{ alignSelf: 'center' }} />
+                )}
+              </TouchableOpacity>
             );
           })}
         </View>
@@ -255,29 +335,52 @@ export default function PlanTab() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: t.bg }]}>
-            {selectedWorkout && (
-              <>
-                <Text style={[styles.modalTitle, { color: t.text }]}>
-                  {new Date(selectedWorkout.dateStr!).toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </Text>
-                <Text style={[styles.modalType, { color: t.primary }]}>
-                  {selectedWorkout.type.toUpperCase()}
-                </Text>
-                <Text style={[styles.modalDesc, { color: t.subtext }]}>
-                  {selectedWorkout.desc}
-                </Text>
-                <Button
-                  title="Close"
-                  onPress={() => setSelectedWorkout(null)}
-                  style={{ marginTop: 24 }}
-                />
-              </>
-            )}
+            {selectedWorkout && (() => {
+              const isSelectedCompleted = selectedWorkout.dateStr
+                ? !!completedWorkouts[getWorkoutDateKey(selectedWorkout.dateStr)]
+                : false;
+              return (
+                <>
+                  <View style={styles.modalHeaderRow}>
+                    <Text style={[styles.modalTitle, { color: t.text, flex: 1 }]}>
+                      {new Date(selectedWorkout.dateStr!).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </Text>
+                    {isSelectedCompleted && (
+                      <View style={[styles.todayBadge, { backgroundColor: '#10B981' }]}>
+                        <Text style={[styles.todayBadgeText, { color: '#fff' }]}>COMPLETED ✓</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.modalType, { color: isSelectedCompleted ? '#10B981' : t.primary }]}>
+                    {selectedWorkout.type.toUpperCase()}
+                  </Text>
+                  <Text style={[styles.modalDesc, { color: t.subtext }]}>
+                    {selectedWorkout.desc}
+                  </Text>
+
+                  {selectedWorkout.type !== 'rest' && (
+                    <Button
+                      title={isSelectedCompleted ? 'Completed ✓' : 'Complete Run'}
+                      variant={isSelectedCompleted ? 'secondary' : 'primary'}
+                      onPress={() => handleToggleComplete(selectedWorkout)}
+                      style={{ marginTop: 20 }}
+                    />
+                  )}
+
+                  <Button
+                    title="Close"
+                    variant="secondary"
+                    onPress={() => setSelectedWorkout(null)}
+                    style={{ marginTop: 10 }}
+                  />
+                </>
+              );
+            })()}
           </View>
         </View>
       </Modal>
@@ -387,7 +490,13 @@ const styles = StyleSheet.create({
     padding: 24,
     minHeight: 250,
   },
-  modalTitle: { fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  modalTitle: { fontSize: 20, fontWeight: '800' },
   modalType: { fontSize: 14, fontWeight: '700', letterSpacing: 1, marginBottom: 16 },
   modalDesc: { fontSize: 16, lineHeight: 24 },
   agendaContainer: { marginTop: 32 },

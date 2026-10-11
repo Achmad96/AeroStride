@@ -7,6 +7,8 @@ import { RunDetailView } from '../src/components/RunDetailView';
 import { insertRun } from '../src/db/database';
 import { useRunStore } from '../src/store/runStore';
 import { useSettings } from '../src/store/settingsStore';
+import { usePlanStore } from '../src/store/planStore';
+import { getWorkoutDateKey } from '../src/tracking/trainingPlan';
 import { canSave, MIN_SAVE_DISTANCE_M, toRunDraft } from '../src/tracking/tracker';
 import { useTheme } from '../src/theme';
 
@@ -31,7 +33,9 @@ export default function Summary() {
 
   const onSave = async () => {
     try {
-      await insertRun(draft);
+      const runId = await insertRun(draft);
+      const todayKey = getWorkoutDateKey(new Date(draft.startTime));
+      await usePlanStore.getState().markDateCompleted(todayKey, runId, false);
       await finish();
     } catch (e) {
       Alert.alert('Could not save run', String(e instanceof Error ? e.message : e));

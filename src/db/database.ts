@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import type { Run, RunDraft, RunListItem } from '../types';
 
-let isMocked = Platform.OS === 'web';
+let isMocked = Platform.OS === 'web' || process.env.NODE_ENV === 'test';
 let mockDb: any = {
   runs: [],
   kv: {},

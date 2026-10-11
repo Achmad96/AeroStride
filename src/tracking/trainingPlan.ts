@@ -247,12 +247,16 @@ export function generateTrainingPlan(
   return { totalDays: dayCounter - 1, workouts };
 }
 
+export function getWorkoutDateKey(dateOrStr: Date | string): string {
+  const d = typeof dateOrStr === 'string' ? new Date(dateOrStr) : dateOrStr;
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
 export function getTodaysWorkout(plan: TrainingPlan, today: Date = new Date()): Workout | null {
   if (!plan.workouts.length) return null;
-  const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const todayKey = getWorkoutDateKey(today);
   return plan.workouts.find((w) => {
     if (!w.dateStr) return false;
-    const d = new Date(w.dateStr);
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayKey;
+    return getWorkoutDateKey(w.dateStr) === todayKey;
   }) || null;
 }

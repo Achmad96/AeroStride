@@ -1,4 +1,4 @@
-import { generateTrainingPlan, getTodaysWorkout } from '../trainingPlan';
+import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey } from '../trainingPlan';
 
 describe('Training Plan Generation', () => {
   it('generates a training plan for distance goal with immediate start date', () => {
@@ -112,6 +112,13 @@ describe('Training Plan Generation', () => {
     const plan = generateTrainingPlan(null, 0, 0, 0, 0, 70, 25, null);
     expect(plan.totalDays).toBe(0);
     expect(getTodaysWorkout(plan)).toBeNull();
+  });
+
+  it('generates consistent date keys with getWorkoutDateKey', () => {
+    const date = new Date(2026, 9, 11);
+    const key = getWorkoutDateKey(date);
+    expect(key).toBe('2026-9-11');
+    expect(getWorkoutDateKey(date.toISOString())).toBe(key);
   });
 });
 
