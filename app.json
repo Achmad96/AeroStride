@@ -1,24 +1,24 @@
 {
   "expo": {
-    "name": "Run Tracker",
-    "slug": "run-tracker",
+    "name": "AeroStride",
+    "slug": "aerostride",
     "version": "1.0.0",
-    "scheme": "runtracker",
+    "scheme": "aerostride",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.example.runtracker",
+      "bundleIdentifier": "com.aerostride",
       "infoPlist": {
         "UIBackgroundModes": [
           "location"
         ],
-        "NSLocationWhenInUseUsageDescription": "Run Tracker uses your location to record your running route, distance and pace.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Run Tracker keeps recording your route while the screen is locked or the app is in the background."
+        "NSLocationWhenInUseUsageDescription": "AeroStride uses your location to record your running route, distance and pace.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "AeroStride keeps recording your route while the screen is locked or the app is in the background."
       }
     },
     "android": {
-      "package": "com.example.runtracker",
+      "package": "com.aerostride",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -46,8 +46,8 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Run Tracker keeps recording your route while the screen is locked or the app is in the background.",
-          "locationWhenInUsePermission": "Run Tracker uses your location to record your running route, distance and pace.",
+          "locationAlwaysAndWhenInUsePermission": "AeroStride keeps recording your route while the screen is locked or the app is in the background.",
+          "locationWhenInUsePermission": "AeroStride uses your location to record your running route, distance and pace.",
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true,
           "isIosBackgroundLocationEnabled": true

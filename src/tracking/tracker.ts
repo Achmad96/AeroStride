@@ -1,8 +1,8 @@
 import { haversineM, paceSecPerKm, M_PER_KM } from './geo';
 import type { Fix, RoutePoint, RunDraft, RunStatus } from '../types';
 
-/** Fixes less accurate than this (metres) are discarded. */
-export const MAX_ACCURACY_M = 30;
+/** Fixes less accurate than this (metres) are discarded (anti-drift). */
+export const MAX_ACCURACY_M = 15;
 /** Implied speeds above this (m/s, ~43 km/h) are treated as GPS jumps. */
 export const MAX_SPEED_MPS = 12;
 /** Steps shorter than this (metres) are treated as GPS jitter while standing. */
@@ -91,9 +91,17 @@ export function getElapsedMs(s: TrackState, now: number): number {
 export function applyFix(s: TrackState, fix: Fix): TrackState {
   if (s.status !== 'running' || s.segmentStart == null) return s;
   if (fix.timestamp < s.segmentStart) return s; // delivered late from a paused period
+  if (!Number.isFinite(fix.lat) || !Number.isFinite(fix.lng)) return s;
   if (fix.accuracy == null || fix.accuracy < 0 || fix.accuracy > MAX_ACCURACY_M) return s;
 
-  const point: RoutePoint = { lat: fix.lat, lng: fix.lng, timestamp: fix.timestamp };
+  const point: RoutePoint = {
+    lat: fix.lat,
+    lng: fix.lng,
+    latitude: fix.latitude ?? fix.lat,
+    longitude: fix.longitude ?? fix.lng,
+    altitude: fix.altitude ?? null,
+    timestamp: fix.timestamp,
+  };
 
   if (!s.last) {
     return {

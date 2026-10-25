@@ -5,7 +5,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { useRunStore } from '../store/runStore';
 import type { Fix } from '../types';
 
-export const LOCATION_TASK = 'run-tracker-location';
+export const LOCATION_TASK = 'aerostride-location';
 
 const isExpoGo =
   Constants.appOwnership === 'expo' ||
@@ -17,6 +17,9 @@ function toFix(l: Location.LocationObject | null | undefined): Fix | null {
   return {
     lat: c.latitude,
     lng: c.longitude,
+    latitude: c.latitude,
+    longitude: c.longitude,
+    altitude: c.altitude ?? null,
     timestamp: l!.timestamp || Date.now(),
     accuracy: c.accuracy ?? null,
   };
@@ -115,14 +118,14 @@ async function startBackgroundUpdates(): Promise<void> {
 
     await Location.startLocationUpdatesAsync(LOCATION_TASK, {
       accuracy: Location.Accuracy.BestForNavigation,
-      distanceInterval: 2,
-      timeInterval: 2000,
+      distanceInterval: 1,
+      timeInterval: 1000,
       activityType: Location.ActivityType.Fitness,
       pausesUpdatesAutomatically: false,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
         notificationTitle: 'Run in progress',
-        notificationBody: 'Run Tracker is recording your route.',
+        notificationBody: 'AeroStride is recording your route.',
         notificationColor: '#0A7F3F',
         killServiceOnDestroy: false,
       },
@@ -142,7 +145,7 @@ export async function startTracking(): Promise<void> {
       watchSubscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          distanceInterval: 2,
+          distanceInterval: 1,
           timeInterval: 1000,
         },
         (loc) => pushFixes([toFix(loc)])

@@ -73,3 +73,22 @@ export function startOfWeek(now: number = Date.now()): number {
   d.setDate(d.getDate() - daysSinceMonday);
   return d.getTime();
 }
+
+/**
+ * Calculates cumulative positive elevation gain in metres from an array of points.
+ * A 0.5m threshold filters minor barometric / GPS altimeter noise.
+ */
+export function calculateElevationGain(points: RoutePoint[]): number {
+  let gain = 0;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1].altitude;
+    const curr = points[i].altitude;
+    if (prev != null && curr != null && curr > prev) {
+      const diff = curr - prev;
+      if (diff >= 0.5) {
+        gain += diff;
+      }
+    }
+  }
+  return Math.round(gain * 10) / 10;
+}

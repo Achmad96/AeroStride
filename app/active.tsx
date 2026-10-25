@@ -66,8 +66,8 @@ export default function ActiveRun() {
   if (!paused) {
     if (lastFixAt == null || now - lastFixAt > NO_SIGNAL_AFTER_MS) {
       gpsMessage = run.points.length ? "GPS signal lost – still timing, distance paused" : "Waiting for GPS signal…";
-    } else if (lastAccuracy == null || lastAccuracy > 30) {
-      gpsMessage = "Weak GPS signal – move to open sky";
+    } else if (lastAccuracy == null || lastAccuracy > 15) {
+      gpsMessage = "Weak GPS signal (accuracy > 15m) – move to open sky";
     }
   }
 

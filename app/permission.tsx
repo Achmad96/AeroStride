@@ -11,7 +11,7 @@ export default function Permission() {
     <View style={styles.container}>
       <Text style={[styles.title, { color: t.text }]}>Location access is required</Text>
       <Text style={[styles.body, { color: t.subtext }]}>
-        Run Tracker uses your phone's GPS to measure distance, pace and draw your route. Your data
+        AeroStride uses your phone's GPS to measure distance, pace and draw your route. Your data
         stays on this device.{'\n\n'}
         For accurate tracking with the screen locked, choose "Allow all the time" (Android) or
         "While Using" / "Always" (iOS) in Settings.

@@ -123,7 +123,7 @@ export async function sendInstantTestReminder(): Promise<boolean> {
 
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Run Tracker Reminder 🏃🔥',
+        title: 'AeroStride Reminder 🏃🔥',
         body: 'Keep your weekly streak going! You have a run scheduled today.',
         sound: true,
         priority: Notifications.AndroidNotificationPriority.HIGH,

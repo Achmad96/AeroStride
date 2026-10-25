@@ -42,10 +42,20 @@ function buildHtml(tileUrl: string, lineColor: string, bg: string) {
 </head><body><div id="map"></div>
 <script>
   var map = L.map('map', { zoomControl: false }).setView([0, 0], 2);
-  L.tileLayer('${tileUrl}', {
+  var tileLayer = L.tileLayer('${tileUrl}', {
     maxZoom: 19, subdomains: 'abcd',
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-  }).addTo(map);
+  });
+  tileLayer.on('tileerror', function(err) {
+    if (!window._osmFallback) {
+      window._osmFallback = true;
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    }
+  });
+  tileLayer.addTo(map);
   var line = L.polyline([], { color: '${lineColor}', weight: 6 }).addTo(map);
   var me = L.circleMarker([0, 0], { radius: 8, color: '#fff', weight: 3, fillColor: '#1E88E5', fillOpacity: 1 });
   var startM = L.circleMarker([0, 0], { radius: 8, color: '#fff', weight: 3, fillColor: '#2E7D32', fillOpacity: 1 });
@@ -90,8 +100,8 @@ function buildHtml(tileUrl: string, lineColor: string, bg: string) {
 </script></body></html>`;
 }
 
-/** Minimum time between map updates in live mode. */
-const LIVE_UPDATE_MS = 2000;
+/** Minimum time between map updates in live mode (1 Hz). */
+const LIVE_UPDATE_MS = 1000;
 
 export function RunMap({ points, follow = false, current = null, style }: Props) {
   const t = useTheme();
@@ -120,13 +130,17 @@ export function RunMap({ points, follow = false, current = null, style }: Props)
     if (!web) return;
     try {
       const { points: pts, current: cur, follow: fol } = latest.current;
-      const curArr = cur ? [cur.lat, cur.lng] : null;
+      const curArr = cur ? [(cur as any).latitude ?? cur.lat, (cur as any).longitude ?? cur.lng] : null;
       // Route was reset/shrunk (new run, different run) -> send everything.
       if (!fol || pts.length < sentCount.current || sentCount.current === 0) {
-        const payload = { points: pts.map((p) => [p.lat, p.lng]), current: curArr, follow: fol };
+        const payload = {
+          points: pts.map((p) => [p.latitude ?? p.lat, p.longitude ?? p.lng]),
+          current: curArr,
+          follow: fol
+        };
         web.injectJavaScript(`window.update && window.update(${JSON.stringify(payload)}); true;`);
       } else {
-        const fresh = pts.slice(sentCount.current).map((p) => [p.lat, p.lng]);
+        const fresh = pts.slice(sentCount.current).map((p) => [p.latitude ?? p.lat, p.longitude ?? p.lng]);
         const payload = { points: fresh, current: curArr, follow: fol };
         web.injectJavaScript(`window.append && window.append(${JSON.stringify(payload)}); true;`);
       }
