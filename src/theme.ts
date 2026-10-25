@@ -9,27 +9,27 @@ export const fonts = {
 };
 
 const light = {
-  bg: '#F8FAFC',
-  card: '#FFFFFF',
-  text: '#0F172A',
-  subtext: '#64748B',
-  border: '#E2E8F0',
-  primary: '#059669',
+  bg: '#FFFFFF',
+  card: '#F1F3F5',
+  text: '#0B0F14',
+  subtext: '#4A5563',
+  border: '#C9CED6',
+  primary: '#0A7F3F',
   onPrimary: '#FFFFFF',
-  danger: '#EF4444',
+  danger: '#C62828',
   onDanger: '#FFFFFF',
 };
 
 const dark: typeof light = {
-  bg: '#0B0D13',
-  card: '#151922',
-  text: '#F8FAFC',
-  subtext: '#94A3B8',
-  border: '#262D3D',
-  primary: '#10B981',
+  bg: '#0B0F14',
+  card: '#1A2028',
+  text: '#FFFFFF',
+  subtext: '#AEB7C4',
+  border: '#3A4452',
+  primary: '#3DDC84',
   onPrimary: '#04210F',
-  danger: '#F87171',
-  onDanger: '#450A0A',
+  danger: '#FF6B6B',
+  onDanger: '#2B0000',
 };
 
 export type Theme = typeof light & { scheme: 'light' | 'dark'; fonts: typeof fonts };

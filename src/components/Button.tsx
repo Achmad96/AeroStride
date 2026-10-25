@@ -33,13 +33,13 @@ export function Button({ title, onPress, variant = 'primary', disabled, style }:
 
 const styles = StyleSheet.create({
   btn: {
-    minHeight: 52,
-    minWidth: 52,
+    minHeight: 56,
+    minWidth: 56,
     paddingHorizontal: 20,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: { fontSize: 16, fontFamily: fonts.bold, letterSpacing: 0.2 },
+  text: { fontSize: 18, fontFamily: fonts.bold },
 });
 

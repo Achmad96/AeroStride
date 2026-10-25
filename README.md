@@ -94,8 +94,8 @@ Ensure you have the following installed on your machine:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Achmad96/AeroStride.git
-cd AeroStride
+git clone https://github.com/your-username/aerostride.git
+cd aerostride
 
 # Install all dependencies
 npm install

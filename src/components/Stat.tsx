@@ -12,7 +12,7 @@ interface Props {
 export function Stat({ label, value, unit, big, style }: Props) {
   const t = useTheme();
   return (
-    <View style={[styles.box, { backgroundColor: t.card, borderColor: t.border, borderWidth: 1 }, style]}>
+    <View style={[styles.box, { backgroundColor: t.card }, style]}>
       <Text style={[styles.label, { color: t.subtext }]}>{label}</Text>
       <Text
         style={[styles.value, { color: t.text, fontSize: big ? 48 : 28 }]}

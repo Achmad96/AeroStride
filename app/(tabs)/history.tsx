@@ -57,7 +57,7 @@ export default function History() {
             accessibilityRole="button"
             onPress={() => router.push(`/detail/${item.id}`)}
             onLongPress={() => confirmDelete(item)}
-            style={({ pressed }) => [styles.card, { backgroundColor: t.card, borderColor: t.border, opacity: pressed ? 0.8 : 1 }]}
+            style={({ pressed }) => [styles.card, { backgroundColor: t.card, opacity: pressed ? 0.8 : 1 }]}
           >
             <Text style={[styles.date, { color: t.subtext }]}>{formatDate(item.startTime)}</Text>
             <View style={styles.row}>
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   list: { padding: 16, gap: 12, flexGrow: 1 },
   empty: { textAlign: 'center', marginTop: 60, fontSize: 17, fontFamily: fonts.medium },
   hint: { textAlign: 'center', fontSize: 13, fontFamily: fonts.regular, marginBottom: 4 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 16, minHeight: 80, gap: 6 },
+  card: { borderRadius: 16, padding: 16, minHeight: 80, gap: 6 },
   date: { fontSize: 14, fontFamily: fonts.semiBold },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   right: { alignItems: 'flex-end' },
