@@ -16,7 +16,7 @@ export function useAirQuality() {
   useEffect(() => {
     let mounted = true;
     async function fetchAqi() {
-      const apiKey = process.env.EXPO_PUBLIC_IQAIR_API_KEY;
+      const apiKey = process.env.EXPO_PUBLIC_IQAIR_API_KEY || process.env.IQAIR_API_KEY;
       if (!apiKey) {
         setError('No API key');
         return;

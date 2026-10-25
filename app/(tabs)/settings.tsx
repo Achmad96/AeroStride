@@ -1,15 +1,20 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View, Alert, type ViewStyle } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../../src/components/Button";
 import { useSettings } from "../../src/store/settingsStore";
 import { useTheme } from "../../src/theme";
 import { getCurrentPerformance } from "../../src/db/database";
+import {
+  getReminderSettings,
+  saveReminderSettings,
+  scheduleDailyRunReminder,
+  sendInstantTestReminder,
+} from "../../src/tracking/notificationService";
 
 function SelectRow<T extends string>({ label, options, value, onChange }: { label: string; options: { label: string; value: T }[]; value: T | null; onChange: (v: T) => void }) {
   const t = useTheme();
-  // If there are more than 3 options, don't force them all on one line.
-  // Using minWidth ensures they wrap into a grid (e.g. 2x2) rather than squishing.
   const buttonStyle: ViewStyle = options.length > 3 ? { flexGrow: 1, minWidth: "45%", paddingVertical: 8 } : { flex: 1, paddingVertical: 8 };
 
   return (
@@ -41,6 +46,10 @@ export default function Settings() {
   const [weight, setWeight] = useState(profile.weightKg);
   const [height, setHeight] = useState(profile.heightCm);
 
+  // Notification Reminder State
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [reminderHour, setReminderHour] = useState(8);
+
   const [currentPerf, setCurrentPerf] = useState<{ speedMinsPerKm: number; distanceKm: number } | null>(null);
 
   useFocusEffect(
@@ -48,8 +57,38 @@ export default function Settings() {
       getCurrentPerformance()
         .then(setCurrentPerf)
         .catch(() => {});
+
+      getReminderSettings().then((s) => {
+        setRemindersEnabled(s.enabled);
+        setReminderHour(s.hour);
+      });
     }, [])
   );
+
+  const handleToggleReminders = async (enabled: boolean) => {
+    setRemindersEnabled(enabled);
+    const updated = { enabled, hour: reminderHour, minute: 0 };
+    await saveReminderSettings(updated);
+    await scheduleDailyRunReminder(updated);
+  };
+
+  const handleSelectHour = async (hour: number) => {
+    setReminderHour(hour);
+    const updated = { enabled: remindersEnabled, hour, minute: 0 };
+    await saveReminderSettings(updated);
+    if (remindersEnabled) {
+      await scheduleDailyRunReminder(updated);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    const success = await sendInstantTestReminder();
+    if (success) {
+      Alert.alert("Test Notification Sent", "Check your notification shade! 🏃🔥");
+    } else {
+      Alert.alert("Permission Required", "Please allow notifications in your device settings to receive reminders.");
+    }
+  };
 
   const save = () => {
     const newStartDate = new Date().toISOString();
@@ -90,6 +129,57 @@ export default function Settings() {
             <Text style={{ color: t.subtext, fontSize: 14 }}>Currently showing {unit === "km" ? "kilometres" : "miles"}</Text>
           </View>
           <Switch accessibilityLabel="Use miles" value={unit === "mi"} onValueChange={(v) => setUnit(v ? "mi" : "km")} trackColor={{ true: t.primary, false: t.border }} />
+        </View>
+
+        {/* Notifications & Reminders Section */}
+        <Text style={[styles.title, { color: t.text, marginTop: 8 }]}>Reminders</Text>
+        <View style={[styles.cardContainer, { backgroundColor: t.card, borderColor: t.border }]}>
+          <View style={styles.cardHeaderRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.sectionTitle, { color: t.text }]}>Daily Run Reminder</Text>
+              <Text style={{ color: t.subtext, fontSize: 13, marginTop: 2 }}>
+                Get notified so you never break your weekly streak
+              </Text>
+            </View>
+            <Switch
+              accessibilityLabel="Daily Run Reminder"
+              value={remindersEnabled}
+              onValueChange={handleToggleReminders}
+              trackColor={{ true: t.primary, false: t.border }}
+            />
+          </View>
+
+          {remindersEnabled && (
+            <View style={styles.reminderOptions}>
+              <Text style={[styles.label, { color: t.subtext }]}>Preferred reminder time</Text>
+              <View style={styles.radioGroup}>
+                {[
+                  { label: "07:00 AM", hour: 7 },
+                  { label: "08:00 AM", hour: 8 },
+                  { label: "05:00 PM", hour: 17 },
+                  { label: "06:30 PM", hour: 18 },
+                ].map((slot) => {
+                  const active = reminderHour === slot.hour;
+                  return (
+                    <Button
+                      key={slot.hour}
+                      title={slot.label}
+                      variant={active ? "primary" : "secondary"}
+                      style={{ flex: 1, minWidth: "45%", paddingVertical: 8 }}
+                      onPress={() => handleSelectHour(slot.hour)}
+                    />
+                  );
+                })}
+              </View>
+
+              <Button
+                title="Send Test Reminder 🔔"
+                variant="secondary"
+                onPress={handleTestNotification}
+                style={{ marginTop: 6 }}
+              />
+            </View>
+          )}
         </View>
 
         <Text style={[styles.title, { color: t.text, marginTop: 16 }]}>Personalize</Text>
@@ -168,10 +258,27 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scroll: { padding: 16, gap: 24, paddingBottom: 40 },
+  scroll: { padding: 16, gap: 20, paddingBottom: 40 },
   row: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 16, minHeight: 72 },
+  cardContainer: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    gap: 14,
+  },
+  cardHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  reminderOptions: {
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.06)",
+    paddingTop: 12,
+  },
   sectionTitle: { fontSize: 18, fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "900", marginBottom: 8 },
+  title: { fontSize: 24, fontWeight: "900", marginBottom: 4 },
   field: { gap: 8 },
   label: { fontSize: 14, fontWeight: "600", textTransform: "uppercase", letterSpacing: 1 },
   radioGroup: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

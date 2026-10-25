@@ -42,6 +42,7 @@
       "expo-router",
       "expo-sqlite",
       "expo-task-manager",
+      "expo-notifications",
       [
         "expo-location",
         {

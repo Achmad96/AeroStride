@@ -24,7 +24,7 @@ interface Props {
  * Free map: Leaflet + CARTO basemap tiles (OpenStreetMap data).
  * No API key, no account, no Google Maps SDK required.
  */
-const CARTO_KEY = process.env.EXPO_PUBLIC_CARTOCDN_API_KEY;
+const CARTO_KEY = process.env.EXPO_PUBLIC_CARTOCDN_API_KEY || process.env.CARTOCDN_API_KEY;
 const KEY_PARAM = CARTO_KEY ? `?key=${CARTO_KEY}` : "";
 
 const TILES = {
@@ -133,7 +133,7 @@ export function RunMap({ points, follow = false, current = null, style }: Props)
       sentCount.current = pts.length;
       lastSentAt.current = Date.now();
     } catch (err) {
-      console.warn('Map update failed:', err);
+      console.warn("Map update failed:", err);
     }
   }, []);
 

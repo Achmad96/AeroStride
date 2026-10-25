@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "start:tunnel": "expo start --tunnel",
+    "start:tunnel": "1",
     "start:dev-client": "expo start --dev-client",
     "start:dev-client:tunnel": "expo start --dev-client --tunnel",
     "android": "expo run:android",
@@ -33,6 +33,7 @@
     "expo-linking": "~57.0.12",
     "expo-location": "~57.0.20",
     "expo-modules-core": "~57.0.21",
+    "expo-notifications": "~57.0.22",
     "expo-router": "~57.0.25",
     "expo-sqlite": "~57.0.4",
     "expo-status-bar": "~57.0.1",

@@ -68,4 +68,19 @@ describe('planStore - Workout Completion', () => {
     expect(record.runId).toBe(999);
     expect(record.isManual).toBe(false);
   });
+
+  it('automatically marks quest completed when a run is in the database', async () => {
+    const startTime = Date.now();
+    const dateKey = getWorkoutDateKey(new Date(startTime));
+
+    // Reset store
+    usePlanStore.setState({ completedWorkouts: {}, loaded: false });
+
+    // Load store which syncs from runs
+    await usePlanStore.getState().load();
+
+    // Since runs from earlier tests exist in DB, verify dateKey is marked completed
+    expect(usePlanStore.getState().isCompleted(dateKey)).toBe(true);
+    expect(usePlanStore.getState().completedWorkouts[dateKey]?.isManual).toBe(false);
+  });
 });

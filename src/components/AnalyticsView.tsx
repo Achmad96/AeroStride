@@ -30,11 +30,12 @@ import { usePlanStore } from '../store/planStore';
 interface Props {
   runs: RunListItem[];
   unit: Unit;
+  headerComponent?: React.ReactNode;
 }
 
 type Timeframe = 'week' | 'month' | 'all';
 
-export function AnalyticsView({ runs, unit }: Props) {
+export function AnalyticsView({ runs, unit, headerComponent }: Props) {
   const t = useTheme();
   const profile = useSettings((s) => s.profile);
   const completedWorkouts = usePlanStore((s) => s.completedWorkouts);
@@ -128,6 +129,8 @@ export function AnalyticsView({ runs, unit }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {headerComponent}
+
       {/* Timeframe Selector Tabs */}
       <View style={[styles.timeframeTabs, { backgroundColor: t.card, borderColor: t.border }]}>
         {(['week', 'month', 'all'] as Timeframe[]).map((tf) => {
@@ -554,3 +557,4 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+

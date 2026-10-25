@@ -98,3 +98,4 @@ describe('Analytics Calculations', () => {
     expect(trend).toEqual([]);
   });
 });
+

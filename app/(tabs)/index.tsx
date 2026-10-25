@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Stat } from '../../src/components/Stat';
-import { Button } from '../../src/components/Button';
-import { getCurrentPerformance, getStatsSince, listRuns, type PeriodStats } from '../../src/db/database';
+import { Ionicons } from '@expo/vector-icons';
+import { AnalyticsView } from '../../src/components/AnalyticsView';
+import { WeeklyStreakCard } from '../../src/components/WeeklyStreakCard';
+import { getCurrentPerformance, listRuns } from '../../src/db/database';
 import { useRunStore } from '../../src/store/runStore';
 import { useSettings } from '../../src/store/settingsStore';
-import { distanceLabel, formatDistance, formatDuration, startOfWeek } from '../../src/tracking/geo';
-import { ensureLocationPermission, startTracking, stopTracking } from '../../src/tracking/locationService';
-import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey, Workout } from '../../src/tracking/trainingPlan';
+import { distanceLabel, formatDistance } from '../../src/tracking/geo';
+import { stopTracking } from '../../src/tracking/locationService';
+import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey } from '../../src/tracking/trainingPlan';
+import { calculateWeeklyStreak } from '../../src/tracking/streak';
+import { getReminderSettings, scheduleDailyRunReminder } from '../../src/tracking/notificationService';
 import { usePlanStore } from '../../src/store/planStore';
-import { WeeklyMiniChart } from '../../src/components/WeeklyMiniChart';
 import { useTheme } from '../../src/theme';
 import type { RunListItem } from '../../src/types';
 
@@ -20,19 +22,15 @@ export default function Home() {
   const unit = useSettings((s) => s.unit);
   const profile = useSettings((s) => s.profile);
   const status = useRunStore((s) => s.run.status);
-  const [stats, setStats] = useState<PeriodStats>({ runs: 0, distanceM: 0, durationSec: 0 });
   const [currentPerf, setCurrentPerf] = useState<{ speedMinsPerKm: number; distanceKm: number } | null>(null);
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const checkedRecovery = useRef(false);
 
   const completedWorkouts = usePlanStore((s) => s.completedWorkouts);
-  const completeWorkout = usePlanStore((s) => s.completeWorkout);
-  const uncompleteWorkout = usePlanStore((s) => s.uncompleteWorkout);
 
   useFocusEffect(
     useCallback(() => {
       usePlanStore.getState().load();
-      getStatsSince(startOfWeek()).then(setStats).catch(() => {});
       getCurrentPerformance().then(setCurrentPerf).catch(() => {});
       listRuns().then(setRuns).catch(() => {});
     }, [])
@@ -59,35 +57,19 @@ export default function Home() {
     ? !!completedWorkouts[getWorkoutDateKey(todaysWorkout.dateStr)]
     : false;
 
-  const handleToggleComplete = async (workout: Workout) => {
-    if (!workout.dateStr) return;
-    const dateKey = getWorkoutDateKey(workout.dateStr);
-    const isCompleted = !!completedWorkouts[dateKey];
+  const streak = useMemo(
+    () => calculateWeeklyStreak(runs, completedWorkouts),
+    [runs, completedWorkouts]
+  );
 
-    if (isCompleted) {
-      Alert.alert(
-        'Mark as Incomplete?',
-        'Do you want to unmark this run as completed?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Mark Incomplete',
-            style: 'destructive',
-            onPress: async () => {
-              await uncompleteWorkout(workout);
-              getStatsSince(startOfWeek()).then(setStats).catch(() => {});
-              getCurrentPerformance().then(setCurrentPerf).catch(() => {});
-            },
-          },
-        ]
-      );
-    } else {
-      await completeWorkout(workout);
-      getStatsSince(startOfWeek()).then(setStats).catch(() => {});
-      getCurrentPerformance().then(setCurrentPerf).catch(() => {});
-      Alert.alert('Run Completed! 🎉', `Marked "${workout.desc}" as complete.`);
-    }
-  };
+  // Automatically schedule reminder if configured
+  useEffect(() => {
+    getReminderSettings().then((settings) => {
+      if (settings.enabled) {
+        scheduleDailyRunReminder(settings, todaysWorkout?.desc).catch(() => {});
+      }
+    });
+  }, [todaysWorkout?.desc]);
 
   // Recover an unsaved run if the app was killed mid-run.
   useEffect(() => {
@@ -115,45 +97,88 @@ export default function Home() {
     })().catch(() => {});
   }, [router, unit]);
 
-  const startRunFlow = async () => {
-    try {
-      if (!(await ensureLocationPermission())) {
-        router.push('/permission');
-        return;
-      }
-      useRunStore.getState().start();
-      await startTracking();
-      router.push('/active');
-    } catch (e) {
-      useRunStore.getState().clear();
-      await stopTracking().catch(() => {});
-      Alert.alert('Could not start run', String(e instanceof Error ? e.message : e));
-    }
-  };
-
   const inProgress = status === 'running' || status === 'paused';
   const finished = status === 'stopped';
 
-  return (
-    <View style={styles.container}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="This week stats, tap to view analytics"
-        onPress={() => router.push({ pathname: '/(tabs)/history', params: { tab: 'analytics' } })}
-        style={({ pressed }) => [
-          styles.week,
-          { backgroundColor: t.card, opacity: pressed ? 0.9 : 1 },
-        ]}
-      >
-        <Text style={[styles.weekTitle, { color: t.subtext }]}>THIS WEEK</Text>
-        <View style={styles.row}>
-          <Stat label="Distance" value={formatDistance(stats.distanceM, unit)} unit={distanceLabel(unit)} style={styles.flat} />
-          <Stat label="Time" value={formatDuration(stats.durationSec)} style={styles.flat} />
-          <Stat label="Runs" value={String(stats.runs)} style={styles.flat} />
-        </View>
-        <WeeklyMiniChart runs={runs} unit={unit} />
-      </Pressable>
+  const headerComponent = (
+    <View style={styles.headerWrapper}>
+      {/* Active or Unsaved Run Banner */}
+      {(inProgress || finished) && (
+        <View
+          style={[
+            styles.bannerCard,
+            {
+              backgroundColor: inProgress ? (status === 'paused' ? '#FEF3C7' : '#D1FAE5') : '#DBEAFE',
+              borderColor: inProgress ? (status === 'paused' ? '#F59E0B' : '#10B981') : '#3B82F6',
+            },
+          ]}
+        >
+          <View style={styles.bannerContent}>
+            <Ionicons
+              name={inProgress ? (status === 'paused' ? 'pause-circle' : 'pulse') : 'checkmark-circle'}
+              size={24}
+              color={inProgress ? (status === 'paused' ? '#D97706' : '#059669') : '#2563EB'}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  styles.bannerTitle,
+                  { color: inProgress ? (status === 'paused' ? '#92400E' : '#065F46') : '#1E40AF' },
+                ]}
+              >
+                {inProgress
+                  ? status === 'paused'
+                    ? 'Run is Paused'
+                    : 'Run In Progress'
+                  : 'Unsaved Run Ready for Review'}
+              </Text>
+              <Text
+                style={[
+                  styles.bannerSub,
+                  { color: inProgress ? (status === 'paused' ? '#B45309' : '#047857') : '#1D4ED8' },
+                ]}
+              >
+                {inProgress ? 'Tap the bottom navbar button or Resume here.' : 'Tap Review to save or discard below.'}
+              </Text>
+            </View>
+          </View>
 
+          <View style={styles.bannerActions}>
+            <Pressable
+              onPress={() => router.push(finished ? '/summary' : '/active')}
+              style={[
+                styles.actionBtn,
+                { backgroundColor: inProgress ? (status === 'paused' ? '#D97706' : '#059669') : '#2563EB' },
+              ]}
+            >
+              <Text style={styles.actionBtnText}>{finished ? 'Review' : 'Resume'}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert('Discard run?', 'This run will be deleted.', [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Discard',
+                    style: 'destructive',
+                    onPress: async () => {
+                      await stopTracking().catch(() => {});
+                      await useRunStore.getState().clear();
+                    },
+                  },
+                ])
+              }
+              style={[styles.actionBtnSecondary, { borderColor: t.border }]}
+            >
+              <Text style={[styles.actionBtnSecondaryText, { color: t.danger }]}>Discard</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* Weekly Streak Card */}
+      <WeeklyStreakCard streak={streak} />
+
+      {/* Today's Target Card */}
       {todaysWorkout && (
         <View
           style={[
@@ -191,64 +216,84 @@ export default function Home() {
               </Text>
             </View>
             <Text style={[styles.todayDesc, { color: t.text }]}>{todaysWorkout.desc}</Text>
+            <View style={styles.todayFooter}>
+              <Text style={[styles.todayLinkText, { color: isTodayCompleted ? '#10B981' : t.primary }]}>
+                {isTodayCompleted ? 'Quest accomplished! View plan →' : 'View training plan →'}
+              </Text>
+            </View>
           </Pressable>
-          {todaysWorkout.type !== 'rest' && (
-            <Button
-              title={isTodayCompleted ? 'Completed ✓' : 'Complete Run'}
-              variant={isTodayCompleted ? 'secondary' : 'primary'}
-              onPress={() => handleToggleComplete(todaysWorkout)}
-              style={{ marginTop: 8 }}
-            />
-          )}
         </View>
       )}
+    </View>
+  );
 
-      <View style={styles.center}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={inProgress ? 'Continue run' : finished ? 'Review run' : 'Start run'}
-          onPress={() =>
-            inProgress ? router.push('/active') : finished ? router.push('/summary') : startRunFlow()
-          }
-          style={({ pressed }) => [
-            styles.startBtn,
-            { backgroundColor: t.primary, opacity: pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Text style={[styles.startText, { color: t.onPrimary }]}>
-            {inProgress ? 'CONTINUE\nRUN' : finished ? 'REVIEW\nRUN' : 'START\nRUN'}
-          </Text>
-        </Pressable>
-      </View>
-      {!inProgress && !finished ? null : (
-        <Button
-          variant="secondary"
-          title="Discard this run"
-          onPress={() =>
-            Alert.alert('Discard run?', 'This run will be deleted.', [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Discard',
-                style: 'destructive',
-                onPress: async () => {
-                  await stopTracking().catch(() => {});
-                  await useRunStore.getState().clear();
-                },
-              },
-            ])
-          }
-        />
-      )}
+  return (
+    <View style={[styles.container, { backgroundColor: t.bg }]}>
+      <AnalyticsView
+        runs={runs}
+        unit={unit}
+        headerComponent={headerComponent}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, gap: 16 },
-  week: { borderRadius: 20, padding: 12, gap: 8 },
-  weekTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 1, textAlign: 'center' },
-  row: { flexDirection: 'row', gap: 8 },
-  flat: { backgroundColor: 'transparent', padding: 4 },
+  container: { flex: 1 },
+  headerWrapper: {
+    gap: 14,
+    marginBottom: 4,
+  },
+  bannerCard: {
+    borderRadius: 16,
+    borderWidth: 1.5,
+    padding: 14,
+    gap: 12,
+  },
+  bannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  bannerSub: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  bannerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  actionBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  actionBtnSecondary: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionBtnSecondaryText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   todayCard: {
     borderRadius: 20,
     padding: 16,
@@ -279,15 +324,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 20,
   },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  startBtn: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+  todayFooter: {
+    marginTop: 6,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
   },
-  startText: { fontSize: 32, fontWeight: '900', textAlign: 'center', letterSpacing: 1 },
+  todayLinkText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
 });
-

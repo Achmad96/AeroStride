@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { kvGet, kvSet, insertRun, deleteRun } from '../db/database';
+import { kvGet, kvSet, insertRun, deleteRun, listRuns } from '../db/database';
 import { getWorkoutDateKey, type Workout } from '../tracking/trainingPlan';
 
 export interface CompletedWorkoutRecord {
@@ -24,12 +24,30 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
   load: async () => {
     try {
       const raw = await kvGet('completed_workouts');
-      if (raw) {
-        set({ completedWorkouts: JSON.parse(raw), loaded: true });
-        return;
+      const current: Record<string, CompletedWorkoutRecord> = raw ? JSON.parse(raw) : {};
+
+      // Automatically sync accomplished runs from the database
+      const runs = await listRuns().catch(() => []);
+      let updated = false;
+      for (const run of runs) {
+        const dateKey = getWorkoutDateKey(new Date(run.startTime));
+        if (!current[dateKey]) {
+          current[dateKey] = {
+            completedAt: run.startTime,
+            runId: run.id,
+            isManual: false,
+          };
+          updated = true;
+        }
       }
-    } catch {}
-    set({ completedWorkouts: {}, loaded: true });
+
+      set({ completedWorkouts: current, loaded: true });
+      if (updated) {
+        await kvSet('completed_workouts', JSON.stringify(current)).catch(() => {});
+      }
+    } catch {
+      set({ completedWorkouts: {}, loaded: true });
+    }
   },
   completeWorkout: async (workout: Workout) => {
     if (!workout.dateStr) return;
@@ -57,6 +75,8 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
         console.error('Failed to insert completed run record', e);
       }
     }
+
+    if (!get().loaded) await get().load();
 
     const next = {
       ...get().completedWorkouts,
@@ -86,6 +106,7 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
     await kvSet('completed_workouts', JSON.stringify(next)).catch(() => {});
   },
   markDateCompleted: async (dateKey: string, runId?: number, isManual = false) => {
+    if (!get().loaded) await get().load();
     const next = {
       ...get().completedWorkouts,
       [dateKey]: {
