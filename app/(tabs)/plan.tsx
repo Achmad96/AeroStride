@@ -4,7 +4,7 @@ import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSettings } from "../../src/store/settingsStore";
 import { usePlanStore } from "../../src/store/planStore";
-import { useTheme } from "../../src/theme";
+import { useTheme, fonts } from "../../src/theme";
 import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey, Workout } from "../../src/tracking/trainingPlan";
 import { Button } from "../../src/components/Button";
 import { useAirQuality } from "../../src/tracking/airQuality";
@@ -338,10 +338,10 @@ export default function PlanTab() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  emptyText: { textAlign: "center", fontSize: 16, lineHeight: 24 },
+  emptyText: { textAlign: "center", fontSize: 16, fontFamily: fonts.medium, lineHeight: 24 },
   scroll: { padding: 16 },
-  header: { fontSize: 24, fontWeight: "800" },
-  subHeader: { fontSize: 14, marginBottom: 16 },
+  header: { fontSize: 24, fontFamily: fonts.extraBold },
+  subHeader: { fontSize: 14, fontFamily: fonts.medium, marginBottom: 16 },
   todayCard: {
     padding: 16,
     borderRadius: 16,
@@ -361,23 +361,23 @@ const styles = StyleSheet.create({
   },
   todayBadgeText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5
   },
   todayType: {
     fontSize: 13,
-    fontWeight: "800",
+    fontFamily: fonts.extraBold,
     letterSpacing: 1
   },
   todayDesc: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: fonts.semiBold,
     lineHeight: 22
   },
   aqiContainer: { padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 24 },
-  aqiTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
-  aqiLevel: { fontSize: 18, fontWeight: "800", marginBottom: 4 },
-  aqiText: { fontSize: 14, lineHeight: 20 },
+  aqiTitle: { fontSize: 16, fontFamily: fonts.bold, marginBottom: 8 },
+  aqiLevel: { fontSize: 18, fontFamily: fonts.extraBold, marginBottom: 4 },
+  aqiText: { fontSize: 14, fontFamily: fonts.regular, lineHeight: 20 },
   monthHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     marginBottom: 16
   },
   navButton: { padding: 4 },
-  monthText: { fontSize: 18, fontWeight: "700" },
+  monthText: { fontSize: 18, fontFamily: fonts.bold },
   weekdayHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   weekdayText: {
     width: 40,
     textAlign: "center",
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     fontSize: 14
   },
   grid: { gap: 8 },
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 14,
-    fontWeight: "700"
+    fontFamily: fonts.bold,
   },
   runDot: {
     width: 4,
@@ -443,16 +443,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4
   },
-  modalTitle: { fontSize: 20, fontWeight: "800" },
-  modalType: { fontSize: 14, fontWeight: "700", letterSpacing: 1, marginBottom: 16 },
-  modalDesc: { fontSize: 16, lineHeight: 24 },
+  modalTitle: { fontSize: 20, fontFamily: fonts.extraBold },
+  modalType: { fontSize: 14, fontFamily: fonts.bold, letterSpacing: 1, marginBottom: 16 },
+  modalDesc: { fontSize: 16, fontFamily: fonts.regular, lineHeight: 24 },
   agendaContainer: { marginTop: 32 },
-  agendaHeader: { fontSize: 20, fontWeight: "800", marginBottom: 16 },
+  agendaHeader: { fontSize: 20, fontFamily: fonts.extraBold, marginBottom: 16 },
   agendaRow: { paddingVertical: 12, borderBottomWidth: 1, flexDirection: "row", gap: 16 },
   agendaDateWrap: { width: 90 },
-  agendaDate: { fontSize: 14, fontWeight: "700", marginBottom: 4 },
-  agendaType: { fontSize: 12, fontWeight: "700", letterSpacing: 0.5 },
-  agendaDesc: { flex: 1, fontSize: 14, lineHeight: 20 },
+  agendaDate: { fontSize: 14, fontFamily: fonts.bold, marginBottom: 4 },
+  agendaType: { fontSize: 12, fontFamily: fonts.bold, letterSpacing: 0.5 },
+  agendaDesc: { flex: 1, fontSize: 14, fontFamily: fonts.regular, lineHeight: 20 },
   accomplishedNote: {
     flexDirection: "row",
     alignItems: "center",
@@ -464,12 +464,13 @@ const styles = StyleSheet.create({
   },
   accomplishedText: {
     fontSize: 13,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     flex: 1,
   },
   notTodayHint: {
     fontStyle: "italic",
     fontSize: 13,
+    fontFamily: fonts.medium,
     marginTop: 16,
     textAlign: "center",
   },

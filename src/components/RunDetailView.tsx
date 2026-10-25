@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { distanceLabel, formatDate, formatDistance, formatDuration, formatPace, paceLabel } from '../tracking/geo';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 import type { RunDraft, Unit } from '../types';
 import { RunMap } from './RunMap';
 import { Stat } from './Stat';
@@ -22,7 +22,7 @@ export function RunDetailView({ run, unit }: { run: RunDraft; unit: Unit }) {
         {run.routePoints.length ? (
           <RunMap points={run.routePoints} />
         ) : (
-          <Text style={{ color: t.subtext, textAlign: 'center', marginTop: 40 }}>No route recorded</Text>
+          <Text style={[styles.emptyRoute, { color: t.subtext }]}>No route recorded</Text>
         )}
       </View>
     </View>
@@ -31,8 +31,8 @@ export function RunDetailView({ run, unit }: { run: RunDraft; unit: Unit }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, gap: 12 },
-  date: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  date: { fontSize: 16, fontFamily: fonts.semiBold, textAlign: 'center' },
+  emptyRoute: { fontFamily: fonts.medium, textAlign: 'center', marginTop: 40 },
   row: { flexDirection: 'row', gap: 12 },
   mapWrap: { flex: 1, borderRadius: 16, overflow: 'hidden', minHeight: 220 },
 });
-

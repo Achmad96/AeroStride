@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
+import { useTheme, fonts } from '../../src/theme';
 import { RunNavbarButton } from '../../src/components/RunNavbarButton';
 
 export default function TabsLayout() {
@@ -10,6 +10,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: t.bg },
         headerTintColor: t.text,
+        headerTitleStyle: { fontFamily: fonts.bold },
         tabBarStyle: {
           backgroundColor: t.bg,
           borderTopColor: t.border,
@@ -17,7 +18,7 @@ export default function TabsLayout() {
         },
         tabBarActiveTintColor: t.primary,
         tabBarInactiveTintColor: t.subtext,
-        tabBarLabelStyle: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
+        tabBarLabelStyle: { fontFamily: fonts.semiBold, fontSize: 13, marginBottom: 6 },
         sceneStyle: { backgroundColor: t.bg },
       }}
     >
@@ -60,4 +61,3 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
-

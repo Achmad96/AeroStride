@@ -4,7 +4,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../../src/components/Button";
 import { useSettings } from "../../src/store/settingsStore";
-import { useTheme } from "../../src/theme";
+import { useTheme, fonts } from "../../src/theme";
 import { getCurrentPerformance } from "../../src/db/database";
 import {
   getReminderSettings,
@@ -126,7 +126,7 @@ export default function Settings() {
         <View style={[styles.row, { backgroundColor: t.card }]}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.sectionTitle, { color: t.text }]}>Use miles</Text>
-            <Text style={{ color: t.subtext, fontSize: 14 }}>Currently showing {unit === "km" ? "kilometres" : "miles"}</Text>
+            <Text style={{ color: t.subtext, fontSize: 14, fontFamily: fonts.medium }}>Currently showing {unit === "km" ? "kilometres" : "miles"}</Text>
           </View>
           <Switch accessibilityLabel="Use miles" value={unit === "mi"} onValueChange={(v) => setUnit(v ? "mi" : "km")} trackColor={{ true: t.primary, false: t.border }} />
         </View>
@@ -137,7 +137,7 @@ export default function Settings() {
           <View style={styles.cardHeaderRow}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.sectionTitle, { color: t.text }]}>Daily Run Reminder</Text>
-              <Text style={{ color: t.subtext, fontSize: 13, marginTop: 2 }}>
+              <Text style={{ color: t.subtext, fontSize: 13, marginTop: 2, fontFamily: fonts.regular }}>
                 Get notified so you never break your weekly streak
               </Text>
             </View>
@@ -201,7 +201,7 @@ export default function Settings() {
             <View style={[styles.field, { flex: 1 }]}>
               <Text style={[styles.label, { color: t.subtext }]}>Current Pace (min/km)</Text>
               <TextInput style={[styles.input, { color: currentPerf ? t.subtext : t.text, backgroundColor: t.card, borderColor: t.border }]} keyboardType="decimal-pad" value={displaySpeed} onChangeText={setCurrSpeed} placeholder="e.g. 6.5" placeholderTextColor={t.subtext} editable={!currentPerf} />
-              {currentPerf && <Text style={{ fontSize: 12, color: t.subtext }}>Auto-calculated from your run history.</Text>}
+              {currentPerf && <Text style={{ fontSize: 12, color: t.subtext, fontFamily: fonts.medium }}>Auto-calculated from your run history.</Text>}
             </View>
             <View style={[styles.field, { flex: 1 }]}>
               <Text style={[styles.label, { color: t.subtext }]}>Target Pace (min/km)</Text>
@@ -215,7 +215,7 @@ export default function Settings() {
             <View style={[styles.field, { flex: 1 }]}>
               <Text style={[styles.label, { color: t.subtext }]}>Current Max (km)</Text>
               <TextInput style={[styles.input, { color: currentPerf ? t.subtext : t.text, backgroundColor: t.card, borderColor: t.border }]} keyboardType="decimal-pad" value={displayDist} onChangeText={setCurrDistance} placeholder="e.g. 5" placeholderTextColor={t.subtext} editable={!currentPerf} />
-              {currentPerf && <Text style={{ fontSize: 12, color: t.subtext }}>Auto-calculated from your run history.</Text>}
+              {currentPerf && <Text style={{ fontSize: 12, color: t.subtext, fontFamily: fonts.medium }}>Auto-calculated from your run history.</Text>}
             </View>
             <View style={[styles.field, { flex: 1 }]}>
               <Text style={[styles.label, { color: t.subtext }]}>Target Distance (km)</Text>
@@ -277,11 +277,11 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(0,0,0,0.06)",
     paddingTop: 12,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "900", marginBottom: 4 },
+  sectionTitle: { fontSize: 18, fontFamily: fonts.bold },
+  title: { fontSize: 24, fontFamily: fonts.extraBold, marginBottom: 4 },
   field: { gap: 8 },
-  label: { fontSize: 14, fontWeight: "600", textTransform: "uppercase", letterSpacing: 1 },
+  label: { fontSize: 14, fontFamily: fonts.semiBold, textTransform: "uppercase", letterSpacing: 1 },
   radioGroup: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  input: { borderWidth: 1, borderRadius: 12, padding: 16, fontSize: 16 },
+  input: { borderWidth: 1, borderRadius: 12, padding: 16, fontSize: 16, fontFamily: fonts.semiBold },
   formRow: { flexDirection: "row", gap: 12 }
 });

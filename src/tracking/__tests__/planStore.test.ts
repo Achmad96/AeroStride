@@ -1,6 +1,6 @@
 import { usePlanStore } from '../../store/planStore';
 import { getWorkoutDateKey, type Workout } from '../trainingPlan';
-import { listRuns } from '../../db/database';
+import { listRuns, insertRun } from '../../db/database';
 
 describe('planStore - Workout Completion', () => {
   beforeEach(async () => {
@@ -72,6 +72,13 @@ describe('planStore - Workout Completion', () => {
   it('automatically marks quest completed when a run is in the database', async () => {
     const startTime = Date.now();
     const dateKey = getWorkoutDateKey(new Date(startTime));
+    const runId = await insertRun({
+      startTime,
+      durationSec: 1200,
+      distanceM: 3000,
+      avgPaceSecPerKm: 400,
+      routePoints: [],
+    });
 
     // Reset store
     usePlanStore.setState({ completedWorkouts: {}, loaded: false });
@@ -79,8 +86,8 @@ describe('planStore - Workout Completion', () => {
     // Load store which syncs from runs
     await usePlanStore.getState().load();
 
-    // Since runs from earlier tests exist in DB, verify dateKey is marked completed
     expect(usePlanStore.getState().isCompleted(dateKey)).toBe(true);
+    expect(usePlanStore.getState().completedWorkouts[dateKey]?.runId).toBe(runId);
     expect(usePlanStore.getState().completedWorkouts[dateKey]?.isManual).toBe(false);
   });
 });

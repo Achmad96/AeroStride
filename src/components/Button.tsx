@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 
 interface Props {
   title: string;
@@ -33,13 +33,13 @@ export function Button({ title, onPress, variant = 'primary', disabled, style }:
 
 const styles = StyleSheet.create({
   btn: {
-    minHeight: 56,
-    minWidth: 56,
+    minHeight: 52,
+    minWidth: 52,
     paddingHorizontal: 20,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: { fontSize: 18, fontWeight: '700' },
+  text: { fontSize: 16, fontFamily: fonts.bold, letterSpacing: 0.2 },
 });
 

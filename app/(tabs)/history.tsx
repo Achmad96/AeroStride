@@ -11,7 +11,7 @@ import {
   formatPace,
   paceLabel,
 } from '../../src/tracking/geo';
-import { useTheme } from '../../src/theme';
+import { useTheme, fonts } from '../../src/theme';
 import type { RunListItem } from '../../src/types';
 
 export default function History() {
@@ -57,7 +57,7 @@ export default function History() {
             accessibilityRole="button"
             onPress={() => router.push(`/detail/${item.id}`)}
             onLongPress={() => confirmDelete(item)}
-            style={({ pressed }) => [styles.card, { backgroundColor: t.card, opacity: pressed ? 0.8 : 1 }]}
+            style={({ pressed }) => [styles.card, { backgroundColor: t.card, borderColor: t.border, opacity: pressed ? 0.8 : 1 }]}
           >
             <Text style={[styles.date, { color: t.subtext }]}>{formatDate(item.startTime)}</Text>
             <View style={styles.row}>
@@ -81,12 +81,12 @@ export default function History() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   list: { padding: 16, gap: 12, flexGrow: 1 },
-  empty: { textAlign: 'center', marginTop: 60, fontSize: 17 },
-  hint: { textAlign: 'center', fontSize: 13, marginBottom: 4 },
-  card: { borderRadius: 16, padding: 16, minHeight: 80, gap: 6 },
-  date: { fontSize: 14, fontWeight: '600' },
+  empty: { textAlign: 'center', marginTop: 60, fontSize: 17, fontFamily: fonts.medium },
+  hint: { textAlign: 'center', fontSize: 13, fontFamily: fonts.regular, marginBottom: 4 },
+  card: { borderRadius: 16, borderWidth: 1, padding: 16, minHeight: 80, gap: 6 },
+  date: { fontSize: 14, fontFamily: fonts.semiBold },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   right: { alignItems: 'flex-end' },
-  dist: { fontSize: 28, fontWeight: '800' },
-  meta: { fontSize: 15, fontWeight: '600' },
+  dist: { fontSize: 28, fontFamily: fonts.extraBold },
+  meta: { fontSize: 15, fontFamily: fonts.semiBold },
 });

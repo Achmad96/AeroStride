@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 import type { WeeklyStreakInfo } from '../tracking/streak';
 
 interface Props {
@@ -81,7 +81,7 @@ export function WeeklyStreakCard({ streak }: Props) {
                       : d.isCompleted
                       ? '#10B981'
                       : t.subtext,
-                    fontWeight: d.isToday || d.isCompleted ? '800' : '600',
+                    fontFamily: d.isToday || d.isCompleted ? fonts.extraBold : fonts.semiBold,
                   },
                 ]}
               >
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
   },
   streakCount: {
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5,
   },
   subText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
     marginTop: 1,
   },
   bestBadge: {
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   bestText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   daysRow: {
     flexDirection: 'row',
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: 12,
+    fontFamily: fonts.semiBold,
   },
 });
 

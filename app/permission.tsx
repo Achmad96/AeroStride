@@ -2,7 +2,7 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '../src/components/Button';
 import { ensureLocationPermission } from '../src/tracking/locationService';
-import { useTheme } from '../src/theme';
+import { useTheme, fonts } from '../src/theme';
 
 export default function Permission() {
   const t = useTheme();
@@ -33,8 +33,8 @@ export default function Permission() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, justifyContent: 'center', gap: 16 },
-  title: { fontSize: 26, fontWeight: '800' },
-  body: { fontSize: 17, lineHeight: 24 },
+  title: { fontSize: 26, fontFamily: fonts.extraBold },
+  body: { fontSize: 17, fontFamily: fonts.regular, lineHeight: 24 },
   actions: { gap: 12, marginTop: 12 },
 });
 

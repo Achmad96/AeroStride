@@ -10,7 +10,7 @@ import { useSettings } from '../src/store/settingsStore';
 import { usePlanStore } from '../src/store/planStore';
 import { getWorkoutDateKey } from '../src/tracking/trainingPlan';
 import { canSave, MIN_SAVE_DISTANCE_M, toRunDraft } from '../src/tracking/tracker';
-import { useTheme } from '../src/theme';
+import { useTheme, fonts } from '../src/theme';
 
 export default function Summary() {
   const t = useTheme();
@@ -68,6 +68,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   flex: { flex: 1 },
-  warn: { textAlign: 'center', fontWeight: '700', fontSize: 15 },
+  warn: { textAlign: 'center', fontFamily: fonts.bold, fontSize: 15 },
 });
 

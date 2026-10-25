@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 import type { RunListItem, Unit } from '../types';
 import {
   getWeeklyDailyVolumes,
@@ -152,7 +152,7 @@ export function AnalyticsView({ runs, unit, headerComponent }: Props) {
                 style={[
                   styles.timeframeText,
                   { color: isSelected ? t.onPrimary : t.subtext },
-                  isSelected && { fontWeight: '800' },
+                  isSelected && { fontFamily: fonts.extraBold },
                 ]}
               >
                 {label}
@@ -236,7 +236,7 @@ export function AnalyticsView({ runs, unit, headerComponent }: Props) {
                     styles.barBottomLabel,
                     {
                       color: isSelected ? t.primary : t.text,
-                      fontWeight: isSelected ? '800' : '600',
+                      fontFamily: isSelected ? fonts.extraBold : fonts.semiBold,
                     },
                   ]}
                 >
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   timeframeText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   card: {
     borderRadius: 18,
@@ -405,12 +405,12 @@ const styles = StyleSheet.create({
   },
   cardSubTitle: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.8,
   },
   cardMainStat: {
     fontSize: 26,
-    fontWeight: '900',
+    fontFamily: fonts.extraBold,
     marginTop: 2,
   },
   activePill: {
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   },
   activePillText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   chartGraphicWrap: {
     flexDirection: 'row',
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   },
   barTopValue: {
     fontSize: 10,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     height: 14,
   },
   barTrack: {
@@ -453,9 +453,11 @@ const styles = StyleSheet.create({
   },
   barBottomLabel: {
     fontSize: 12,
+    fontFamily: fonts.semiBold,
   },
   chartHint: {
     fontSize: 11,
+    fontFamily: fonts.regular,
     textAlign: 'center',
     marginTop: -4,
   },
@@ -478,16 +480,16 @@ const styles = StyleSheet.create({
   },
   statBoxLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.6,
   },
   statBoxValue: {
     fontSize: 22,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
   },
   statBoxUnit: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   paceHeaderRow: {
     flexDirection: 'row',
@@ -496,7 +498,7 @@ const styles = StyleSheet.create({
   },
   paceFastest: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginTop: 2,
   },
   trendBadge: {
@@ -509,7 +511,7 @@ const styles = StyleSheet.create({
   },
   trendBadgeText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5,
   },
   paceList: {
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
   paceDate: {
     width: 44,
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   paceBarTrack: {
     flex: 1,
@@ -540,7 +542,7 @@ const styles = StyleSheet.create({
   paceValue: {
     width: 48,
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     textAlign: 'right',
   },
   planHeader: {
@@ -550,10 +552,11 @@ const styles = StyleSheet.create({
   },
   planCount: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
   },
   planDesc: {
     fontSize: 13,
+    fontFamily: fonts.regular,
     lineHeight: 18,
   },
 });

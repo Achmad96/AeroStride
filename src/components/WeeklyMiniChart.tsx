@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 import type { RunListItem, Unit } from '../types';
 import { getWeeklyDailyVolumes } from '../tracking/analytics';
 import { distanceInUnit, formatDistance } from '../tracking/geo';
@@ -64,7 +64,7 @@ export function WeeklyMiniChart({ runs, unit }: Props) {
                   styles.dayLabel,
                   {
                     color: day.isToday ? t.primary : t.subtext,
-                    fontWeight: day.isToday ? '800' : '600',
+                    fontFamily: day.isToday ? fonts.extraBold : fonts.semiBold,
                   },
                 ]}
               >
@@ -91,12 +91,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.8,
   },
   totalText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   chartRow: {
     flexDirection: 'row',
@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: 11,
+    fontFamily: fonts.semiBold,
   },
 });
 

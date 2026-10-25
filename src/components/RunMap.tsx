@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import type { WebView as WebViewType } from "react-native-webview";
-import { useTheme } from "../theme";
+import { useTheme, fonts } from "../theme";
 import type { RoutePoint } from "../types";
 
 let WebView: typeof WebViewType | null = null;
@@ -189,7 +189,7 @@ export function RunMap({ points, follow = false, current = null, style }: Props)
         cacheEnabled
         renderError={() => (
           <View style={[styles.error, { backgroundColor: t.card }]}>
-            <Text style={{ color: t.subtext }}>Map unavailable (no internet?)</Text>
+            <Text style={{ color: t.subtext, fontFamily: fonts.medium }}>Map unavailable (no internet?)</Text>
           </View>
         )}
       />

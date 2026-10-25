@@ -13,7 +13,7 @@ import { generateTrainingPlan, getTodaysWorkout, getWorkoutDateKey } from '../..
 import { calculateWeeklyStreak } from '../../src/tracking/streak';
 import { getReminderSettings, scheduleDailyRunReminder } from '../../src/tracking/notificationService';
 import { usePlanStore } from '../../src/store/planStore';
-import { useTheme } from '../../src/theme';
+import { useTheme, fonts } from '../../src/theme';
 import type { RunListItem } from '../../src/types';
 
 export default function Home() {
@@ -257,12 +257,12 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.3,
   },
   bannerSub: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
     marginTop: 2,
   },
   bannerActions: {
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: '#fff',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
   },
   actionBtnSecondary: {
     paddingHorizontal: 14,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   actionBtnSecondaryText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   todayCard: {
     borderRadius: 20,
@@ -311,17 +311,17 @@ const styles = StyleSheet.create({
   },
   todayBadgeText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5,
   },
   todayType: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 1,
   },
   todayDesc: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     lineHeight: 20,
   },
   todayFooter: {
@@ -331,6 +331,6 @@ const styles = StyleSheet.create({
   },
   todayLinkText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
 });

@@ -1,33 +1,40 @@
 import { useColorScheme } from 'react-native';
 
+export const fonts = {
+  regular: 'Montserrat_400Regular',
+  medium: 'Montserrat_500Medium',
+  semiBold: 'Montserrat_600SemiBold',
+  bold: 'Montserrat_700Bold',
+  extraBold: 'Montserrat_800ExtraBold',
+};
+
 const light = {
-  bg: '#FFFFFF',
-  card: '#F1F3F5',
-  text: '#0B0F14',
-  subtext: '#4A5563',
-  border: '#C9CED6',
-  primary: '#0A7F3F',
+  bg: '#F8FAFC',
+  card: '#FFFFFF',
+  text: '#0F172A',
+  subtext: '#64748B',
+  border: '#E2E8F0',
+  primary: '#059669',
   onPrimary: '#FFFFFF',
-  danger: '#C62828',
+  danger: '#EF4444',
   onDanger: '#FFFFFF',
 };
 
 const dark: typeof light = {
-  bg: '#0B0F14',
-  card: '#1A2028',
-  text: '#FFFFFF',
-  subtext: '#AEB7C4',
-  border: '#3A4452',
-  primary: '#3DDC84',
+  bg: '#0B0D13',
+  card: '#151922',
+  text: '#F8FAFC',
+  subtext: '#94A3B8',
+  border: '#262D3D',
+  primary: '#10B981',
   onPrimary: '#04210F',
-  danger: '#FF6B6B',
-  onDanger: '#2B0000',
+  danger: '#F87171',
+  onDanger: '#450A0A',
 };
 
-export type Theme = typeof light & { scheme: 'light' | 'dark' };
+export type Theme = typeof light & { scheme: 'light' | 'dark'; fonts: typeof fonts };
 
 export function useTheme(): Theme {
   const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
-  return { ...(scheme === 'dark' ? dark : light), scheme };
+  return { ...(scheme === 'dark' ? dark : light), scheme, fonts };
 }
-

@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet, Alert, Platform } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRunStore } from '../store/runStore';
-import { useTheme } from '../theme';
+import { useTheme, fonts } from '../theme';
 import { ensureLocationPermission, startTracking } from '../tracking/locationService';
 
 export function RunNavbarButton() {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   label: {
     color: '#FFFFFF',
     fontSize: 9,
-    fontWeight: '900',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5,
     marginTop: 1,
   },

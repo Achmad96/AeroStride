@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { RunDetailView } from '../../src/components/RunDetailView';
 import { getRun } from '../../src/db/database';
 import { useSettings } from '../../src/store/settingsStore';
-import { useTheme } from '../../src/theme';
+import { useTheme, fonts } from '../../src/theme';
 import type { Run } from '../../src/types';
 
 export default function Detail() {
@@ -23,7 +23,7 @@ export default function Detail() {
       {run === undefined ? (
         <ActivityIndicator color={t.primary} size="large" />
       ) : run === null ? (
-        <Text style={{ color: t.subtext, textAlign: 'center' }}>Run not found.</Text>
+        <Text style={{ color: t.subtext, textAlign: 'center', fontFamily: fonts.medium }}>Run not found.</Text>
       ) : (
         <RunDetailView run={run} unit={unit} />
       )}

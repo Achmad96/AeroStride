@@ -10,7 +10,7 @@ import { useSettings } from "../src/store/settingsStore";
 import { distanceLabel, formatDistance, formatDuration, formatPace, paceLabel } from "../src/tracking/geo";
 import { startTracking, stopTracking } from "../src/tracking/locationService";
 import { getCurrentPaceSecPerKm, getElapsedMs } from "../src/tracking/tracker";
-import { useTheme } from "../src/theme";
+import { useTheme, fonts } from "../src/theme";
 
 const NO_SIGNAL_AFTER_MS = 15_000;
 
@@ -21,7 +21,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
     <SafeAreaView style={[styles.container, styles.errorWrap, { backgroundColor: t.bg }]}>
       <Text style={[styles.errorTitle, { color: t.text }]}>Something went wrong</Text>
-      <Text style={{ color: t.subtext, textAlign: "center" }}>
+      <Text style={{ color: t.subtext, textAlign: "center", fontFamily: fonts.regular }}>
         Your run is still being recorded. {error?.message ?? ""}
       </Text>
       <Button title="Try again" onPress={retry} />
@@ -125,10 +125,10 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   mapWrap: { flex: 1, minHeight: 180 },
   banner: { position: "absolute", top: 12, left: 12, right: 12, borderRadius: 12, padding: 12 },
-  bannerText: { fontSize: 16, fontWeight: "700", textAlign: "center" },
+  bannerText: { fontSize: 16, fontFamily: fonts.bold, textAlign: "center" },
   panel: { padding: 16, gap: 12 },
   row: { flexDirection: "row", gap: 12 },
   flex: { flex: 1 },
   errorWrap: { justifyContent: "center", padding: 24, gap: 16 },
-  errorTitle: { fontSize: 22, fontWeight: "800", textAlign: "center" }
+  errorTitle: { fontSize: 22, fontFamily: fonts.extraBold, textAlign: "center" }
 });
