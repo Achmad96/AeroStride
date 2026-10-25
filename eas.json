@@ -14,6 +14,8 @@
         "buildType": "apk"
       },
       "env": {
+        "EXPO_PUBLIC_IQAIR_API_KEY": "bcc849bc-8c8f-434c-bff2-b297041ac934",
+        "EXPO_PUBLIC_CARTOCDN_API_KEY": "cb1_4gbf_1_8b97f94c42cbd1ca0a7a1f03",
         "IQAIR_API_KEY": "bcc849bc-8c8f-434c-bff2-b297041ac934",
         "CARTOCDN_API_KEY": "cb1_4gbf_1_8b97f94c42cbd1ca0a7a1f03"
       }
